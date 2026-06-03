@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Pengiriman</title>
+
+<style>
+
+body{
+  margin:0;
+  padding:15px;
+  background:#f5f7fa;
+  font-family:Arial,sans-serif;
+}
+
+.header{
+  background:#1565c0;
+  color:white;
+  padding:20px;
+  border-radius:15px;
+  text-align:center;
+  font-size:28px;
+  font-weight:bold;
+  margin-bottom:20px;
+}
+
+.jumlah{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.tanggal-besar{
+  font-size:24px;
+  font-weight:bold;
+  color:#1565c0;
+}
+
+.total{
+  margin-top:10px;
+  font-size:18px;
+  font-weight:bold;
+}
+
+.card{
+  background:white;
+  border-radius:15px;
+  padding:18px;
+  margin-bottom:15px;
+  box-shadow:0 3px 10px rgba(0,0,0,.15);
+  white-space:pre-wrap;
+  line-height:1.7;
+  font-size:16px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+🚚 CEK PENGIRIMAN 
+</div>
+
+<div id="jumlah" class="jumlah">
+Memuat data...
+</div>
+
+<div id="list"></div>
+
+<script>
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbwmXMx6F6-XjjsikpofXZfWJWNsnEEliyQCoFkVCMZzfn9rfAQRaJmdu8niM63p9zEE/exec";
+
+fetch(API_URL)
+.then(r => r.json())
+.then(data => {
+
+  let html = "";
+  let total = 0;
+  let tanggalPengiriman = "";
+
+  data.forEach(row => {
+
+    const isi = row[0];
+
+    if(!isi) return;
+
+    total++;
+
+    if(!tanggalPengiriman && row[1]){
+
+      const tgl = new Date(row[1]);
+
+      tanggalPengiriman =
+        tgl.toLocaleDateString("id-ID",{
+          day:"2-digit",
+          month:"long",
+          year:"numeric"
+        });
+
+    }
+
+    html += `
+    <div class="card">
+${isi}
+    </div>
+    `;
+
+  });
+
+  document.getElementById("jumlah").innerHTML = `
+    <div class="tanggal-besar">
+      📅 ${tanggalPengiriman}
+    </div>
+
+    <div class="total">
+      Total Pengiriman : ${total}
+    </div>
+  `;
+
+  document.getElementById("list").innerHTML = html;
+
+})
+.catch(err => {
+
+  document.getElementById("jumlah").innerHTML =
+  "❌ Gagal mengambil data";
+
+  console.log(err);
+
+});
+
+</script>
+
+</body>
+</html>
