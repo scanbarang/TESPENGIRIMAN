@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>Pengiriman</title>
 
 <style>
@@ -14,7 +13,7 @@ body{
   font-family:Arial,sans-serif;
 }
 
-/* HEADER SUPER COMPACT */
+/* HEADER */
 .header{
   background:#1565c0;
   color:white;
@@ -37,14 +36,7 @@ body{
   font-size:18px;
 }
 
-/* BOX PILIH */
-div[style*="background:white"]{
-  padding:10px !important;
-  margin-bottom:8px !important;
-  border-radius:12px;
-}
-
-/* INFO ATAS */
+/* INFO */
 .jumlah{
   text-align:center;
   margin-bottom:8px;
@@ -62,7 +54,7 @@ div[style*="background:white"]{
   font-weight:bold;
 }
 
-/* CARD SUPER COMPACT */
+/* CARD */
 .card{
   background:white;
   border-radius:12px;
@@ -74,12 +66,9 @@ div[style*="background:white"]{
   font-size:14px;
 }
 
-/* HAPUS SPASI PARAGRAF */
-.card p{
-  margin:0;
-}
+.card p{margin:0;}
 
-/* AKSI BUTTON ROW RAPAT */
+/* AKSI */
 .aksi{
   margin-top:6px;
   display:flex;
@@ -87,7 +76,6 @@ div[style*="background:white"]{
   gap:5px;
 }
 
-/* BUTTON WA */
 .wa-btn{
   display:inline-flex;
   align-items:center;
@@ -102,7 +90,6 @@ div[style*="background:white"]{
   margin:0;
 }
 
-/* BUTTON TERKIRIM */
 .kirim-btn{
   background:#1565c0;
   color:white;
@@ -114,187 +101,214 @@ div[style*="background:white"]{
   font-size:13px;
   margin:0;
 }
+
+/* LOGIN */
+#loginBox{
+  position:fixed;
+  inset:0;
+  background:#0f172a;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+
+#loginBox > div{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  width:85%;
+  max-width:300px;
+  text-align:center;
+}
+
+#loginBox input, #loginBox select{
+  width:100%;
+  padding:8px;
+  margin-bottom:10px;
+}
+
+#loginBox button{
+  width:100%;
+  padding:8px;
+  background:#1565c0;
+  color:white;
+  border:none;
+  border-radius:8px;
+}
+
 </style>
 </head>
 
 <body>
-<div class="header" style="text-align:center;padding:15px;">
-  <img src="logo.png"
-       style="width:120px;height:120px;border-radius:50%;border:4px solid #22c55e;object-fit:cover;">
-  <h2 style="margin-top:10px;">CEK PENGIRIMAN</h2>
+
+<!-- LOGIN -->
+<div id="loginBox">
+  <div>
+    <h3>LOGIN DRIVER</h3>
+
+    <select id="user">
+      <option value="">-- Pilih Nama --</option>
+      <option value="Poniadi">Poniadi</option>
+      <option value="Eko">Eko</option>
+      <option value="Sendi">Sendi</option>
+      <option value="Dwi">Dwi</option>
+      <option value="Friza">Friza</option>
+      <option value="Rudi">Rudi</option>
+    </select>
+
+    <input id="pin" type="password" placeholder="PIN">
+
+    <button onclick="login()">LOGIN</button>
+
+    <p id="loginError" style="color:red;font-size:12px;"></p>
+  </div>
 </div>
 
-
-<div style="background:white;padding:15px;border-radius:15px;margin-bottom:15px;box-shadow:0 3px 10px rgba(0,0,0,.15);">
-
-<h3>Pilih Pengiriman</h3>
-
-<select id="pengiriman" style="width:100%;padding:10px;font-size:16px;">
-<option value="">-- Pilih Nama --</option>
-<option>Poniadi</option>
-<option>Eko</option>
-<option>Sendi</option>
-<option>Dwi</option>
-<option>Friza</option>
-<option>Rudi</option>
-</select>
-
+<!-- HEADER -->
+<div class="header">
+  <img src="logo.png">
+  <h2>CEK PENGIRIMAN</h2>
 </div>
 
-<div id="jumlah" class="jumlah">
-Memuat data...
+<!-- PILIH (tidak terlalu penting lagi tapi tetap ada) -->
+<div style="background:white;padding:10px;border-radius:12px;margin-bottom:8px;">
+<h3 style="margin:0 0 6px 0;">Pengiriman Aktif</h3>
+<div id="driverShow"></div>
 </div>
 
+<div id="jumlah" class="jumlah">Memuat data...</div>
 <div id="list"></div>
 
 <script>
 
-const API_URL =
-"https://script.google.com/macros/s/AKfycbwmXMx6F6-XjjsikpofXZfWJWNsnEEliyQCoFkVCMZzfn9rfAQRaJmdu8niM63p9zEE/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwmXMx6F6-XjjsikpofXZfWJWNsnEEliyQCoFkVCMZzfn9rfAQRaJmdu8niM63p9zEE/exec";
+
+/* LOGIN DATA */
+const users = {
+  "Poniadi":"1111",
+  "Eko":"2222",
+  "Sendi":"3333",
+  "Dwi":"4444",
+  "Friza":"5555",
+  "Rudi":"6666"
+};
+
+function login(){
+  const user = document.getElementById("user").value;
+  const pin = document.getElementById("pin").value;
+
+  if(users[user] === pin){
+    localStorage.setItem("driver", user);
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("driverShow").innerHTML = "Driver: <b>"+user+"</b>";
+    loadData();
+  } else {
+    document.getElementById("loginError").innerText = "PIN salah!";
+  }
+}
+
+/* LOAD DATA */
+function loadData(){
 
 fetch(API_URL)
-.then(r => r.json())
-.then(data => {
+.then(r=>r.json())
+.then(data=>{
 
-  let html = "";
-  let total = 0;
-  let tanggalPengiriman = "";
+let html = "";
+let total = 0;
+let tanggalPengiriman = "";
 
-  data.forEach(row => {
+data.forEach(row=>{
 
-    const isi = row[0]
-.replace(/\n\s*\n\s*\n/g,"\n")
+const isi = (row[0]||"")
+.replace(/\n\s*\n+/g,"\n")
 .trim();
 
-    if(!isi) return;
+if(!isi) return;
 
-    total++;
+total++;
 
-    if(!tanggalPengiriman && row[1]){
+if(!tanggalPengiriman && row[1]){
+const tgl = new Date(row[1]);
+tanggalPengiriman = tgl.toLocaleDateString("id-ID",{day:"2-digit",month:"long",year:"numeric"});
+}
 
-      const tgl = new Date(row[1]);
-
-      tanggalPengiriman =
-        tgl.toLocaleDateString("id-ID",{
-          day:"2-digit",
-          month:"long",
-          year:"numeric"
-        });
-
-    }
-
-    const wa1Match = isi.match(/WA 1 : ([0-9]+)/);
+const wa1Match = isi.match(/WA 1 : ([0-9]+)/);
 const wa2Match = isi.match(/WA 2 : ([0-9]+)/);
 const customerMatch = isi.match(/CUSTOMER : (.*)/);
 
 const wa1 = wa1Match ? wa1Match[1] : "";
 const wa2 = wa2Match ? wa2Match[1] : "";
 const customer = customerMatch ? customerMatch[1].trim() : "";
+
 html += `
 <div class="card">
 
 ${isi}
 
 <div class="aksi">
-<a href="https://wa.me/62${wa1.substring(1)}"
-target="_blank"
-class="wa-btn">
-💬 WA 1
-</a>
+<a href="https://wa.me/62${wa1.substring(1)}" target="_blank" class="wa-btn">💬 WA 1</a>
+<a href="https://wa.me/62${wa2.substring(1)}" target="_blank" class="wa-btn">💬 WA 2</a>
 
-<a href="https://wa.me/62${wa2.substring(1)}"
-target="_blank"
-class="wa-btn">
-💬 WA 2
-</a>
-
-<button
-onclick="kirimStatus(this,'${customer}','${wa1}')"
-class="kirim-btn">
+<button class="kirim-btn" onclick="kirimStatus(this,'${customer}','${wa1}')">
 ✅ TERKIRIM
 </button>
 </div>
 
 </div>
 `;
-  });
+});
 
-  document.getElementById("jumlah").innerHTML = `
-    <div class="tanggal-besar">
-    🗓️ ${tanggalPengiriman}
-    </div>
+document.getElementById("jumlah").innerHTML = `
+<div class="tanggal-besar">🗓️ ${tanggalPengiriman}</div>
+<div class="total">Total Pengiriman : ${total}</div>
+`;
 
-    <div class="total">
-      Total Pengiriman : ${total}
-    </div>
-  `;
-
-  document.getElementById("list").innerHTML = html;
-
-})
-.catch(err => {
-
-  document.getElementById("jumlah").innerHTML =
-  "❌ Gagal mengambil data";
-
-  console.log(err);
+document.getElementById("list").innerHTML = html;
 
 });
-function kirimStatus(btn,customer,wa){
-
-const pengiriman =
-document.getElementById("pengiriman").value;
-
-if(!pengiriman){
-
-alert("Pilih nama pengiriman terlebih dahulu");
-
-return;
 
 }
+
+/* KIRIM STATUS */
+function kirimStatus(btn,customer,wa){
+
+const driver = localStorage.getItem("driver");
 
 fetch(API_URL,{
 method:"POST",
 body:JSON.stringify({
 customer:customer,
 status:"TERKIRIM",
-pengiriman:pengiriman,
-catatan:"",
+pengiriman:driver,
 wa:wa
 })
 })
 .then(r=>r.text())
 .then(res=>{
 
-if(res == "SUDAH_TERKIRIM"){
+btn.innerHTML="🟢 SUDAH TERKIRIM";
+btn.disabled=true;
+btn.style.background="#16a34a";
 
-  btn.innerHTML = "🟢 SUDAH TERKIRIM";
-  btn.disabled = true;
-  btn.style.background = "#16a34a";
-
-  alert("Order ini sudah pernah ditandai TERKIRIM");
-
-  return;
-
-}
-
-btn.innerHTML = "🟢 SUDAH TERKIRIM";
-btn.disabled = true;
-btn.style.background = "#16a34a";
-
-alert(
-  customer +
-  " berhasil ditandai TERKIRIM"
-);
-
-})
-.catch(err=>{
-
-alert("Gagal : " + err);
+alert(customer+" berhasil dikirim");
 
 });
 
 }
+
+/* AUTO LOGIN CHECK */
+window.onload = function(){
+const driver = localStorage.getItem("driver");
+
+if(driver){
+document.getElementById("loginBox").style.display="none";
+document.getElementById("driverShow").innerHTML="Driver: <b>"+driver+"</b>";
+loadData();
+}
+};
+
 </script>
 
 </body>
