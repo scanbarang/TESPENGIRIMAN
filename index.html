@@ -5,7 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>Pengiriman</title>
+.aksi{
+  margin-top:10px;
+}
 
+.wa-btn{
+  display:inline-block;
+  background:#25D366;
+  color:white;
+  padding:10px 15px;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:bold;
+  margin-right:5px;
+  margin-top:5px;
+}
+
+.kirim-btn{
+  background:#1565c0;
+  color:white;
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:5px;
+}
 <style>
 
 body{
@@ -102,7 +127,9 @@ fetch(API_URL)
 
   data.forEach(row => {
 
-    const isi = row[0];
+    const isi = row[0]
+.replace(/\n\s*\n\s*\n/g,"\n")
+.trim();
 
     if(!isi) return;
 
@@ -131,7 +158,7 @@ const customer = customerMatch ? customerMatch[1].trim() : "";
 html += `
 <div class="card">
 
-${isi.trim()}
+${isi}
 
 <div class="aksi">
 <a href="https://wa.me/62${wa1.substring(1)}"
