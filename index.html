@@ -7,16 +7,16 @@
 
 <style>
 body{
-  font-family:Arial;
-  background:#f5f7fa;
   margin:0;
   padding:10px;
+  font-family:Arial;
+  background:#f5f7fa;
 }
 
 .header{
   background:#1565c0;
   color:white;
-  padding:15px;
+  padding:12px;
   text-align:center;
   border-radius:10px;
   margin-bottom:10px;
@@ -27,20 +27,21 @@ body{
   padding:10px;
   margin-bottom:10px;
   border-radius:10px;
-  box-shadow:0 2px 5px rgba(0,0,0,.1);
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
 
 .aksi{
-  margin-top:10px;
+  margin-top:8px;
+  display:flex;
+  gap:5px;
 }
 
 .wa-btn{
   background:#25D366;
   color:white;
   padding:6px 10px;
-  text-decoration:none;
   border-radius:6px;
-  margin-right:5px;
+  text-decoration:none;
 }
 
 .kirim-btn{
@@ -63,21 +64,32 @@ body{
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/XXXXXXXX/exec";
+const API_URL = "https://script.google.com/macros/s/XXXXX/exec";
 
 function loadData(){
 
 fetch(API_URL + "?t=" + new Date().getTime())
-.then(r=>r.json())
-.then(data=>{
+.then(r => r.json())
+.then(data => {
 
 let html = "";
 
-data.forEach(row=>{
+data.forEach(row => {
+
+try {
 
 const customer = row[1];
 const status = row[2] || "";
+const driver = row[3] || "";
 const wa = row[6] || "";
+
+if(!customer) return;
+
+/* SAFE WA */
+let waLink = "#";
+if(wa && wa.length > 3){
+waLink = "https://wa.me/62" + wa.substring(1);
+}
 
 const sudah = status === "TERKIRIM";
 
@@ -85,10 +97,11 @@ html += `
 <div class="card">
 
 <p>${customer}</p>
+<p>${driver ? "Driver: "+driver : ""}</p>
 
 <div class="aksi">
 
-<a class="wa-btn" href="https://wa.me/62${wa.substring(1)}" target="_blank">WA</a>
+<a class="wa-btn" href="${waLink}" target="_blank">WA</a>
 
 <button class="kirim-btn" ${sudah ? "disabled" : ""}
 onclick="kirimStatus('${customer}')">
@@ -99,10 +112,19 @@ ${sudah ? "SUDAH TERKIRIM" : "TERKIRIM"}
 
 </div>
 `;
+
+} catch(e){
+console.log("error row", e);
+}
+
 });
 
 document.getElementById("list").innerHTML = html;
 
+})
+.catch(err => {
+console.log("FETCH ERROR:", err);
+document.getElementById("list").innerHTML = "Gagal load data";
 });
 
 }
@@ -115,7 +137,8 @@ body:JSON.stringify({
 customer:customer,
 driver:""
 })
-}).then(()=>loadData());
+})
+.then(()=>loadData());
 
 }
 
