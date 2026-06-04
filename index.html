@@ -128,55 +128,33 @@ const customerMatch = isi.match(/CUSTOMER : (.*)/);
 const wa1 = wa1Match ? wa1Match[1] : "";
 const wa2 = wa2Match ? wa2Match[1] : "";
 const customer = customerMatch ? customerMatch[1].trim() : "";
-
 html += `
 <div class="card">
 
-${isi}
+${isi.trim()}
 
-<br><br>
-
+<div class="aksi">
 <a href="https://wa.me/62${wa1.substring(1)}"
 target="_blank"
-style="
-display:inline-block;
-padding:10px;
-background:#25D366;
-color:white;
-text-decoration:none;
-border-radius:10px;
-margin:3px;">
+class="wa-btn">
 💬 WA 1
 </a>
 
 <a href="https://wa.me/62${wa2.substring(1)}"
 target="_blank"
-style="
-display:inline-block;
-padding:10px;
-background:#25D366;
-color:white;
-text-decoration:none;
-border-radius:10px;
-margin:3px;">
+class="wa-btn">
 💬 WA 2
 </a>
 
 <button
 onclick="kirimStatus(this,'${customer}','${wa1}')"
-style="
-padding:10px;
-background:#1565c0;
-color:white;
-border:none;
-border-radius:10px;
-margin:3px;">
+class="kirim-btn">
 ✅ TERKIRIM
 </button>
+</div>
 
 </div>
 `;
-
   });
 
   document.getElementById("jumlah").innerHTML = `
