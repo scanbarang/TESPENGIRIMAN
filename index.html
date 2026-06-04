@@ -6,69 +6,25 @@
 <title>Pengiriman</title>
 
 <style>
-body{
-  margin:0;
-  padding:8px;
-  font-family:Arial;
-  background:#f5f7fa;
-}
+body{font-family:Arial;margin:0;padding:8px;background:#f5f7fa}
 
-.header{
-  background:#1565c0;
-  color:white;
-  padding:10px;
-  text-align:center;
-  border-radius:10px;
-}
+.card{background:#fff;padding:10px;margin:6px;border-radius:8px;white-space:pre-wrap}
 
-.card{
-  background:white;
-  padding:8px;
-  margin-top:6px;
-  border-radius:8px;
-  font-size:13px;
-  white-space:pre-wrap;
-}
-
-.aksi{
-  display:flex;
-  gap:4px;
-  margin-top:6px;
-}
-
-a,button{
-  flex:1;
+button{
+  width:100%;
   padding:6px;
-  font-size:11px;
-  border-radius:6px;
-  border:none;
-  cursor:pointer;
-  text-align:center;
-}
-
-.wa1{
-  background:#25D366;
-  color:white;
-  text-decoration:none;
-}
-
-.kirim{
+  margin-top:6px;
   background:#1565c0;
   color:white;
-}
-
-.sudah{
-  background:#16a34a;
-  color:white;
+  border:none;
+  border-radius:6px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  CEK PENGIRIMAN
-</div>
+<h3 style="text-align:center">PDF BESOK</h3>
 
 <div id="list">Loading...</div>
 
@@ -76,35 +32,34 @@ a,button{
 
 const API_URL = "https://script.google.com/macros/s/AKfycbxuDE6FlKICIcXm24k8UPP8GW7MPlPAOrqkGyyZCO11CKGj_tYbhKx7CSyrXqXFGpAA/exec";
 
-/* LOAD DATA */
+function getValue(text, key){
+  const match = text.match(new RegExp(key + ": (.*)"));
+  return match ? match[1].trim() : "";
+}
+
 function loadData(){
 
-fetch(API_URL + "?t=" + new Date().getTime())
-.then(r => r.json())
-.then(data => {
+fetch(API_URL)
+.then(r=>r.json())
+.then(data=>{
 
-let html = "";
+let html="";
 
-data.forEach(row => {
+data.forEach(row=>{
 
-const customer = row[0];
-if(!customer) return;
+const text = row[0];
+if(!text) return;
 
-const detail = row[0];
+const customer = getValue(text,"CUSTOMER");
+const wa1 = getValue(text,"WA1");
+const wa2 = getValue(text,"WA2");
 
 html += `
 <div class="card">
 
-${detail}
+${text}
 
-<div class="aksi">
-
-<button class="kirim"
-onclick="kirim('${customer}')">
-TERKIRIM
-</button>
-
-</div>
+<button onclick="kirim('${customer}')">TERKIRIM</button>
 
 </div>
 `;
@@ -117,24 +72,21 @@ document.getElementById("list").innerHTML = html;
 
 }
 
-/* KIRIM STATUS */
 function kirim(customer){
 
 const driver = "DRIVER";
 
-fetch(API_URL + "?customer=" + encodeURIComponent(customer) + "&driver=" + encodeURIComponent(driver), {
-method:"POST"
+fetch(API_URL,{
+method:"POST",
+body:new URLSearchParams({
+customer: customer,
+driver: driver
 })
-.then(r => r.text())
-.then(res => {
-
-if(res === "OK"){
-  alert(customer + " TERKIRIM");
-  loadData();
-}else{
-  alert("Gagal");
-}
-
+})
+.then(r=>r.text())
+.then(res=>{
+alert(res);
+loadData();
 });
 
 }
