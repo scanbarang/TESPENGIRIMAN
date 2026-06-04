@@ -226,6 +226,10 @@ wa:wa
 .then(r=>r.text())
 .then(res=>{
 
+btn.innerHTML = "🟢 SUDAH TERKIRIM";
+btn.disabled = true;
+btn.style.background = "#16a34a";
+
 alert(
 customer +
 " berhasil ditandai TERKIRIM"
