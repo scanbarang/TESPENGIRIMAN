@@ -16,22 +16,21 @@ body{
 .header{
   background:#1565c0;
   color:white;
-  padding:8px 10px;
+  padding:10px;
   border-radius:12px;
   text-align:center;
   margin-bottom:8px;
 }
 
 .header img{
-  width:90px;
-  height:90px;
+  width:80px;
+  height:80px;
   border-radius:50%;
   border:3px solid #22c55e;
-  object-fit:cover;
 }
 
 .header h2{
-  margin:4px 0 0 0;
+  margin:5px 0 0 0;
   font-size:18px;
 }
 
@@ -58,7 +57,7 @@ body{
   margin-bottom:8px;
   box-shadow:0 2px 6px rgba(0,0,0,.08);
   white-space:pre-wrap;
-  line-height:1.35;
+  line-height:1.4;
   font-size:14px;
 }
 
@@ -88,6 +87,10 @@ body{
   font-weight:bold;
   cursor:pointer;
   font-size:13px;
+}
+
+.kirim-btn:disabled{
+  background:#16a34a;
 }
 
 /* LOGIN */
@@ -154,8 +157,8 @@ body{
 </div>
 
 <div style="background:white;padding:10px;border-radius:12px;margin-bottom:8px;">
-<h3 style="margin:0;">Pengiriman Aktif</h3>
-<div id="driverShow"></div>
+  <h3 style="margin:0;">Pengiriman Aktif</h3>
+  <div id="driverShow"></div>
 </div>
 
 <div id="jumlah" class="jumlah">Memuat data...</div>
@@ -195,39 +198,50 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
 let html = "";
 let total = 0;
-let tanggalPengiriman = "";
+let tanggal = "";
 
 data.forEach(row=>{
 
-const isi = (row[0]||"").replace(/\n\s*\n+/g,"\n").trim();
-if(!isi) return;
+const tanggalRow = row[0];
+const customer = row[1];
+const status = row[2];
+const pengiriman = row[3];
+const jam = row[4];
+const wa = row[6];
+
+if(!customer) return;
 
 total++;
 
-if(!tanggalPengiriman && row[1]){
-const tgl = new Date(row[1]);
-tanggalPengiriman = tgl.toLocaleDateString("id-ID",{day:"2-digit",month:"long",year:"numeric"});
+if(!tanggal && tanggalRow){
+tanggal = new Date(tanggalRow).toLocaleDateString("id-ID",{day:"2-digit",month:"long",year:"numeric"});
 }
 
-const wa1Match = isi.match(/WA 1 : ([0-9]+)/);
-const wa2Match = isi.match(/WA 2 : ([0-9]+)/);
-const customerMatch = isi.match(/CUSTOMER : (.*)/);
+/* 🔥 FIX STATUS INI YANG PENTING */
+const sudahKirim = status === "TERKIRIM";
 
-const wa1 = wa1Match ? wa1Match[1] : "";
-const wa2 = wa2Match ? wa2Match[1] : "";
-const customer = customerMatch ? customerMatch[1].trim() : "";
+const btnText = sudahKirim
+  ? "🟢 SUDAH TERKIRIM"
+  : "✅ TERKIRIM";
+
+const disabled = sudahKirim ? "disabled" : "";
 
 html += `
 <div class="card">
-${isi}
+
+${customer}  
+${pengiriman ? "Driver: "+pengiriman : ""}  
+${jam ? "Jam: "+jam : ""}
 
 <div class="aksi">
-<a class="wa-btn" href="https://wa.me/62${wa1.substring(1)}" target="_blank">💬 WA 1</a>
-<a class="wa-btn" href="https://wa.me/62${wa2.substring(1)}" target="_blank">💬 WA 2</a>
 
-<button class="kirim-btn" onclick="kirimStatus(this,'${customer}')">
-✅ TERKIRIM
+<a class="wa-btn" href="https://wa.me/62${wa.substring(1)}" target="_blank">💬 WA</a>
+
+<button class="kirim-btn" ${disabled}
+onclick="kirimStatus(this,'${customer}')">
+${btnText}
 </button>
+
 </div>
 
 </div>
@@ -235,7 +249,7 @@ ${isi}
 });
 
 document.getElementById("jumlah").innerHTML =
-`<div class="tanggal-besar">🗓️ ${tanggalPengiriman}</div>
+`<div class="tanggal-besar">🗓️ ${tanggal}</div>
 <div class="total">Total Pengiriman : ${total}</div>`;
 
 document.getElementById("list").innerHTML = html;
@@ -254,8 +268,7 @@ method:"POST",
 body:JSON.stringify({
 customer:customer,
 status:"TERKIRIM",
-driver:driver,
-wa:""
+driver:driver
 })
 })
 .then(r=>r.text())
@@ -263,16 +276,15 @@ wa:""
 
 btn.innerHTML="🟢 SUDAH TERKIRIM";
 btn.disabled=true;
-btn.style.background="#16a34a";
 
-loadData(); // 🔥 AUTO REFRESH BIAR DRIVER LAIN LANGSUNG UPDATE
+loadData(); // 🔥 WAJIB SUPAYA LANGSUNG UPDATE SEMUA
 
 });
 
 }
 
 /* AUTO LOGIN */
-window.onload = function(){
+window.onload=function(){
 const driver = localStorage.getItem("driver");
 
 if(driver){
