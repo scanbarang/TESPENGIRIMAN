@@ -14,16 +14,31 @@ body{
   font-family:Arial,sans-serif;
 }
 
+/* HEADER */
 .header{
   background:#1565c0;
   color:white;
   padding:20px;
   border-radius:15px;
   text-align:center;
-  font-size:22px;
   margin-bottom:15px;
 }
 
+.header img{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid white;
+  margin-bottom:10px;
+}
+
+.header h2{
+  margin:0;
+  font-size:20px;
+}
+
+/* CARD */
 .card{
   background:white;
   padding:15px;
@@ -90,7 +105,13 @@ a{
 <body>
 
 <div class="header">
-  CEK PENGIRIMAN
+
+  <!-- LOGO -->
+  <img src="logo.png" alt="logo">
+
+  <!-- JUDUL -->
+  <h2>CEK PENGIRIMAN</h2>
+
 </div>
 
 <div id="jumlah">Memuat data...</div>
@@ -132,7 +153,7 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
     const sudah = status === "TERKIRIM";
 
-    /* 🔥 AMBIL NOMOR 08 DARI TEKS */
+    /* AMBIL WA DARI TEKS */
     let found = isi.match(/08\d{8,13}/g) || [];
 
     let wa1 = found[0] || "";
@@ -179,15 +200,10 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
   document.getElementById("list").innerHTML = html;
 
-})
-.catch(err => {
-  console.log(err);
-  document.getElementById("list").innerHTML = "❌ Gagal load data";
 });
 
 }
 
-/* UPDATE STATUS */
 function kirimStatus(customer){
 
 fetch(API_URL,{
@@ -197,7 +213,7 @@ customer:customer,
 status:"TERKIRIM"
 })
 })
-.then(() => loadData());
+.then(()=>loadData());
 
 }
 
