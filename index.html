@@ -13,70 +13,50 @@ body{
   background:#f5f7fa;
 }
 
-/* HEADER */
 .header{
   background:#1565c0;
   color:white;
   padding:10px;
   text-align:center;
   border-radius:10px;
-  margin-bottom:8px;
 }
 
-.header img{
-  width:55px;
-  height:55px;
-  border-radius:50%;
-}
-
-/* INFO */
-#jumlah{
-  text-align:center;
-  margin:8px 0;
-}
-
-.tanggal{
-  font-size:18px;
-  font-weight:bold;
-  color:#1565c0;
-}
-
-/* CARD */
 .card{
   background:white;
   padding:8px;
-  margin-bottom:6px;
+  margin-top:6px;
   border-radius:8px;
   font-size:13px;
   white-space:pre-wrap;
 }
 
-/* ACTION */
 .aksi{
   display:flex;
   gap:4px;
   margin-top:6px;
 }
 
-a, button{
+a,button{
   flex:1;
   padding:6px;
   font-size:11px;
   border-radius:6px;
-  text-align:center;
   border:none;
   cursor:pointer;
+  text-align:center;
 }
 
-/* WA */
-.wa1{background:#25D366;color:white;text-decoration:none;}
-.wa2{background:#128C7E;color:white;text-decoration:none;}
+.wa1{
+  background:#25D366;
+  color:white;
+  text-decoration:none;
+}
 
-/* KIRIM */
 .kirim{
   background:#1565c0;
   color:white;
 }
+
 .sudah{
   background:#16a34a;
   color:white;
@@ -87,125 +67,74 @@ a, button{
 <body>
 
 <div class="header">
-  <img src="logo.png">
-  <div>CEK PENGIRIMAN</div>
+  CEK PENGIRIMAN
 </div>
 
-<div id="jumlah">Loading...</div>
-<div id="list"></div>
+<div id="list">Loading...</div>
 
 <script>
 
-/* 🔥 PASTIKAN INI BENAR */
 const API_URL = "https://script.google.com/macros/s/AKfycbxuDE6FlKICIcXm24k8UPP8GW7MPlPAOrqkGyyZCO11CKGj_tYbhKx7CSyrXqXFGpAA/exec";
 
-/* =====================
-   LOAD DATA (SAFE)
-===================== */
+/* LOAD DATA */
 function loadData(){
 
 fetch(API_URL + "?t=" + new Date().getTime())
-.then(r => r.text())
-.then(txt => {
+.then(r => r.json())
+.then(data => {
 
-  let data = JSON.parse(txt);
+let html = "";
 
-  let html = "";
-  let total = 0;
-  let tanggal = "";
+data.forEach(row => {
 
-  data.forEach(row => {
+const customer = row[0];
+if(!customer) return;
 
-    const isi = row[0];
-    const tgl = row[1];
-    const status = row[2] || "";
+const detail = row[0];
 
-    if(!isi) return;
+html += `
+<div class="card">
 
-    total++;
+${detail}
 
-    if(!tanggal && tgl){
-      tanggal = new Date(tgl).toLocaleDateString("id-ID",{day:"2-digit",month:"long",year:"numeric"});
-    }
+<div class="aksi">
 
-    const sudah = status === "TERKIRIM";
+<button class="kirim"
+onclick="kirim('${customer}')">
+TERKIRIM
+</button>
 
-    /* ambil WA */
-    let wa = isi.match(/08\d{8,13}/g) || [];
-    let wa1 = wa[0] || "";
-    let wa2 = wa[1] || "";
+</div>
 
-    let waBtn = "";
+</div>
+`;
 
-    if(wa1){
-      waBtn += `<a class="wa1" href="https://wa.me/62${wa1.substring(1)}" target="_blank">WA 1</a>`;
-    }
-    if(wa2){
-      waBtn += `<a class="wa2" href="https://wa.me/62${wa2.substring(1)}" target="_blank">WA 2</a>`;
-    }
+});
 
-    html += `
-      <div class="card">
-        ${isi}
+document.getElementById("list").innerHTML = html;
 
-        <div class="aksi">
-          ${waBtn}
-
-          <button class="${sudah?'sudah':'kirim'}"
-            onclick="kirimStatus('${isi.replace(/'/g,'')}')"
-            ${sudah?'disabled':''}>
-            ${sudah?'TERKIRIM':'KIRIM'}
-          </button>
-
-        </div>
-      </div>
-    `;
-
-  });
-
-  document.getElementById("jumlah").innerHTML = `
-    <div class="tanggal">📅 ${tanggal}</div>
-    <div>Total Pengiriman: ${total}</div>
-  `;
-
-  document.getElementById("list").innerHTML = html;
-
-})
-.catch(err => {
-  document.getElementById("jumlah").innerHTML = "GAGAL LOAD DATA";
-  console.log(err);
 });
 
 }
 
-/* =====================
-   KIRIM STATUS (FIXED)
-===================== */
-function kirimStatus(customer){
+/* KIRIM STATUS */
+function kirim(customer){
 
-const driver = localStorage.getItem("driver") || "DRIVER";
+const driver = "DRIVER";
 
-const url =
-API_URL +
-"?customer=" + encodeURIComponent(customer) +
-"&driver=" + encodeURIComponent(driver);
-
-fetch(url)
+fetch(API_URL + "?customer=" + encodeURIComponent(customer) + "&driver=" + encodeURIComponent(driver), {
+method:"POST"
+})
 .then(r => r.text())
 .then(res => {
 
-  console.log("RESPON:", res);
+if(res === "OK"){
+  alert(customer + " TERKIRIM");
+  loadData();
+}else{
+  alert("Gagal");
+}
 
-  if(res === "OK"){
-    loadData();
-  } else {
-    alert("Gagal update: " + res);
-  }
-
-})
-.catch(err => {
-  alert("Server error");
-  console.log(err);
 });
 
 }
