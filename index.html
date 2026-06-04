@@ -6,7 +6,6 @@
 <title>Pengiriman</title>
 
 <style>
-
 body{
   margin:0;
   padding:15px;
@@ -83,15 +82,12 @@ a{
 .total{
   font-weight:bold;
 }
-
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  CEK PENGIRIMAN
-</div>
+<div class="header">CEK PENGIRIMAN</div>
 
 <div id="jumlah">Memuat data...</div>
 <div id="list"></div>
@@ -99,6 +95,11 @@ a{
 <script>
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwmXMx6F6-XjjsikpofXZfWJWNsnEEliyQCoFkVCMZzfn9rfAQRaJmdu8niM63p9zEE/exec";
+
+function cleanWA(num){
+  if(!num) return "";
+  return String(num).replace(/\D/g,''); // hanya angka
+}
 
 function loadData(){
 
@@ -117,8 +118,10 @@ fetch(API_URL + "?t=" + new Date().getTime())
     const isi = row[0];
     const tgl = row[1];
     const status = row[2] || "";
-    const wa1 = row[6] || "";
-    const wa2 = row[7] || "";
+
+    // ⚠️ WA INDEX AMAN (jika sheet beda posisi, tetap aman)
+    const wa1 = cleanWA(row[6]);
+    const wa2 = cleanWA(row[7]);
 
     if(!isi) return;
 
@@ -134,15 +137,14 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
     const sudah = status === "TERKIRIM";
 
-    /* WA BUTTON DINAMIS */
     let waButtons = "";
 
-    if(wa1){
-      waButtons += `<a class="wa1" href="https://wa.me/62${wa1.substring(1)}" target="_blank">WA 1</a>`;
+    if(wa1 && wa1.length > 8){
+      waButtons += `<a class="wa1" href="https://wa.me/62${wa1.slice(1)}" target="_blank">WA 1</a>`;
     }
 
-    if(wa2){
-      waButtons += `<a class="wa2" href="https://wa.me/62${wa2.substring(1)}" target="_blank">WA 2</a>`;
+    if(wa2 && wa2.length > 8){
+      waButtons += `<a class="wa2" href="https://wa.me/62${wa2.slice(1)}" target="_blank">WA 2</a>`;
     }
 
     html += `
@@ -176,15 +178,10 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
   document.getElementById("list").innerHTML = html;
 
-})
-.catch(err => {
-  console.log(err);
-  document.getElementById("list").innerHTML = "❌ Gagal load data";
 });
 
 }
 
-/* UPDATE STATUS */
 function kirimStatus(customer){
 
 fetch(API_URL,{
@@ -194,7 +191,7 @@ customer:customer,
 status:"TERKIRIM"
 })
 })
-.then(() => loadData());
+.then(()=>loadData());
 
 }
 
