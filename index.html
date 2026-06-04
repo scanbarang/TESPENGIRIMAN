@@ -28,8 +28,8 @@ body{
   width:60px;
   height:60px;
   border-radius:50%;
-  border:2px solid white;
   object-fit:cover;
+  border:2px solid white;
 }
 
 .header h2{
@@ -88,7 +88,7 @@ a{
 .wa1{background:#25D366;}
 .wa2{background:#128C7E;}
 
-/* BUTTON KIRIM */
+/* KIRIM BUTTON */
 .btn{
   flex:1;
   padding:5px 6px;
@@ -127,7 +127,7 @@ a{
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbx9veL_u48nqEJT4ZiqpwJv-GVjIhIr9N9LnsWu92lze5SV6TDkInKORotAkvZV0p51/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxqk1VDYfBJSkg-GG6h873O2BYw-FrK_Oj4-erWqtcEpxgnVkvabiIRt24MOnVc9v8x/exec";
 
 /* LOAD DATA */
 function loadData(){
@@ -211,27 +211,27 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
 }
 
-/* KIRIM STATUS */
+/* KIRIM STATUS (PASTI JALAN) */
 function kirimStatus(customer){
 
 const driver = localStorage.getItem("driver") || "DRIVER";
 
-fetch(API_URL,{
-method:"POST",
-headers:{
-  "Content-Type":"application/json"
-},
-body:JSON.stringify({
-customer:customer,
-driver:driver
-})
-})
+fetch(API_URL + "?customer=" + encodeURIComponent(customer) + "&driver=" + encodeURIComponent(driver))
 .then(r => r.text())
 .then(res => {
 
-  console.log(res);
-  loadData();
+  console.log("RESPON:", res);
 
+  if(res === "OK"){
+    loadData();
+  } else {
+    alert("Gagal update: " + res);
+  }
+
+})
+.catch(err => {
+  console.log(err);
+  alert("Error koneksi ke server");
 });
 
 }
