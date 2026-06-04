@@ -7,82 +7,113 @@
 <title>Pengiriman</title>
 
 <style>
-.aksi{
-  margin-top:8px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px; /* ini pengganti margin biar rapi */
+body{
+  margin:0;
+  padding:10px;
+  background:#f5f7fa;
+  font-family:Arial,sans-serif;
 }
 
+/* HEADER SUPER COMPACT */
+.header{
+  background:#1565c0;
+  color:white;
+  padding:8px 10px;
+  border-radius:12px;
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.header img{
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  border:3px solid #22c55e;
+  object-fit:cover;
+}
+
+.header h2{
+  margin:4px 0 0 0;
+  font-size:18px;
+}
+
+/* BOX PILIH */
+div[style*="background:white"]{
+  padding:10px !important;
+  margin-bottom:8px !important;
+  border-radius:12px;
+}
+
+/* INFO ATAS */
+.jumlah{
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.tanggal-besar{
+  font-size:18px;
+  font-weight:bold;
+  color:#1565c0;
+  margin-bottom:2px;
+}
+
+.total{
+  font-size:14px;
+  font-weight:bold;
+}
+
+/* CARD SUPER COMPACT */
+.card{
+  background:white;
+  border-radius:12px;
+  padding:10px;
+  margin-bottom:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+  white-space:pre-wrap;
+  line-height:1.35;
+  font-size:14px;
+}
+
+/* HAPUS SPASI PARAGRAF */
+.card p{
+  margin:0;
+}
+
+/* AKSI BUTTON ROW RAPAT */
+.aksi{
+  margin-top:6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+}
+
+/* BUTTON WA */
 .wa-btn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
   background:#25D366;
   color:white;
-  padding:8px 12px;
+  padding:6px 10px;
   border-radius:8px;
   text-decoration:none;
   font-weight:bold;
-  margin:0; /* HAPUS jarak lama */
+  font-size:13px;
+  margin:0;
 }
 
+/* BUTTON TERKIRIM */
 .kirim-btn{
   background:#1565c0;
   color:white;
-  padding:8px 12px;
+  padding:6px 10px;
   border:none;
   border-radius:8px;
   font-weight:bold;
   cursor:pointer;
-  margin:0; /* HAPUS margin-top */
-}
-body{
+  font-size:13px;
   margin:0;
-  padding:15px;
-  background:#f5f7fa;
-  font-family:Arial,sans-serif;
 }
-
-.header{
-  background:#1565c0;
-  color:white;
-  padding:20px;
-  border-radius:15px;
-  text-align:center;
-  font-size:28px;
-  font-weight:bold;
-  margin-bottom:20px;
-}
-
-.jumlah{
-  text-align:center;
-  margin-bottom:20px;
-}
-
-.tanggal-besar{
-  font-size:24px;
-  font-weight:bold;
-  color:#1565c0;
-}
-
-.total{
-  margin-top:10px;
-  font-size:18px;
-  font-weight:bold;
-}
-
-.card{
-  background:white;
-  border-radius:15px;
-  padding:18px;
-  margin-bottom:15px;
-  box-shadow:0 3px 10px rgba(0,0,0,.15);
-  white-space:pre-wrap;
-  line-height:1.7;
-  font-size:16px;
-}
-
 </style>
 </head>
 
