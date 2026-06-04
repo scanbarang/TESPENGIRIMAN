@@ -1,3 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pengiriman</title>
+
+<style>
+
+body{
+  margin:0;
+  padding:15px;
+  background:#f5f7fa;
+  font-family:Arial,sans-serif;
+}
+
+.header{
+  background:#1565c0;
+  color:white;
+  padding:20px;
+  border-radius:15px;
+  text-align:center;
+  font-size:22px;
+  margin-bottom:15px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  margin-bottom:10px;
+  border-radius:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+  white-space:pre-wrap;
+}
+
+.aksi{
+  margin-top:10px;
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+}
+
+a{
+  text-decoration:none;
+  padding:6px 10px;
+  border-radius:6px;
+  color:white;
+  font-size:13px;
+}
+
+.wa1{background:#25D366;}
+.wa2{background:#128C7E;}
+
+.btn{
+  padding:6px 10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.kirim{
+  background:#1565c0;
+  color:white;
+}
+
+.sudah{
+  background:green;
+  color:white;
+}
+
+.jumlah{
+  text-align:center;
+  margin-bottom:15px;
+}
+
+.tanggal-besar{
+  font-size:18px;
+  font-weight:bold;
+  color:#1565c0;
+}
+
+.total{
+  font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  CEK PENGIRIMAN
+</div>
+
+<div id="jumlah">Memuat data...</div>
+<div id="list"></div>
+
+<script>
+
+const API_URL = "https://script.google.com/macros/s/AKfycbwmXMx6F6-XjjsikpofXZfWJWNsnEEliyQCoFkVCMZzfn9rfAQRaJmdu8niM63p9zEE/exec";
+
 function loadData(){
 
 fetch(API_URL + "?t=" + new Date().getTime())
@@ -30,15 +132,11 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
     const sudah = status === "TERKIRIM";
 
-    /* 🔥 AMBIL WA DARI TEKS ORDER (ISI) */
-    let wa1 = "";
-    let wa2 = "";
+    /* 🔥 AMBIL NOMOR 08 DARI TEKS */
+    let found = isi.match(/08\d{8,13}/g) || [];
 
-    const wa1Match = isi.match(/WA\s*1\s*[:\-]?\s*(08\d{8,13})/i);
-    const wa2Match = isi.match(/WA\s*2\s*[:\-]?\s*(08\d{8,13})/i);
-
-    if(wa1Match) wa1 = wa1Match[1];
-    if(wa2Match) wa2 = wa2Match[1];
+    let wa1 = found[0] || "";
+    let wa2 = found[1] || "";
 
     let waButtons = "";
 
@@ -88,3 +186,24 @@ fetch(API_URL + "?t=" + new Date().getTime())
 });
 
 }
+
+/* UPDATE STATUS */
+function kirimStatus(customer){
+
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+customer:customer,
+status:"TERKIRIM"
+})
+})
+.then(() => loadData());
+
+}
+
+loadData();
+
+</script>
+
+</body>
+</html>
