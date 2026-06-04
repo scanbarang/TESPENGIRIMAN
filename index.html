@@ -163,7 +163,7 @@ margin:3px;">
 </a>
 
 <button
-onclick="kirimStatus('${customer}','${wa1}')"
+onclick="kirimStatus(this,'${customer}','${wa1}')"
 style="
 padding:10px;
 background:#1565c0;
@@ -200,7 +200,7 @@ margin:3px;">
   console.log(err);
 
 });
-function kirimStatus(customer,wa){
+function kirimStatus(btn,customer,wa){
 
 const pengiriman =
 document.getElementById("pengiriman").value;
@@ -226,13 +226,25 @@ wa:wa
 .then(r=>r.text())
 .then(res=>{
 
+if(res == "SUDAH_TERKIRIM"){
+
+  btn.innerHTML = "🟢 SUDAH TERKIRIM";
+  btn.disabled = true;
+  btn.style.background = "#16a34a";
+
+  alert("Order ini sudah pernah ditandai TERKIRIM");
+
+  return;
+
+}
+
 btn.innerHTML = "🟢 SUDAH TERKIRIM";
 btn.disabled = true;
 btn.style.background = "#16a34a";
 
 alert(
-customer +
-" berhasil ditandai TERKIRIM"
+  customer +
+  " berhasil ditandai TERKIRIM"
 );
 
 })
