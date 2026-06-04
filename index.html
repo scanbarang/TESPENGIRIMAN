@@ -6,25 +6,59 @@
 <title>Pengiriman</title>
 
 <style>
-body{font-family:Arial;margin:0;padding:8px;background:#f5f7fa}
+body{margin:0;padding:10px;font-family:Arial;background:#f5f7fa}
 
-.card{background:#fff;padding:10px;margin:6px;border-radius:8px;white-space:pre-wrap}
-
-button{
-  width:100%;
-  padding:6px;
-  margin-top:6px;
+.header{
   background:#1565c0;
   color:white;
+  padding:12px;
+  text-align:center;
+  border-radius:10px;
+  font-size:18px;
+  font-weight:bold;
+}
+
+.card{
+  background:white;
+  padding:10px;
+  margin-top:8px;
+  border-radius:10px;
+  white-space:pre-wrap;
+}
+
+.aksi{
+  display:flex;
+  gap:5px;
+  margin-top:8px;
+}
+
+a,button{
+  flex:1;
+  padding:6px;
   border:none;
   border-radius:6px;
+  font-size:12px;
+  text-align:center;
+}
+
+.wa{
+  background:#25D366;
+  color:white;
+  text-decoration:none;
+}
+
+.kirim{
+  background:#1565c0;
+  color:white;
 }
 </style>
 </head>
 
 <body>
 
-<h3 style="text-align:center">PDF BESOK</h3>
+<div class="header">
+CEK PENGIRIMAN - PDF BESOK
+</div>
 
 <div id="list">Loading...</div>
 
@@ -32,9 +66,10 @@ button{
 
 const API_URL = "https://script.google.com/macros/s/AKfycbxuDE6FlKICIcXm24k8UPP8GW7MPlPAOrqkGyyZCO11CKGj_tYbhKx7CSyrXqXFGpAA/exec";
 
-function getValue(text, key){
-  const match = text.match(new RegExp(key + ": (.*)"));
-  return match ? match[1].trim() : "";
+function getVal(text,key){
+  const r = new RegExp(key + ": (.*)");
+  const m = text.match(r);
+  return m ? m[1].trim() : "";
 }
 
 function loadData(){
@@ -50,16 +85,26 @@ data.forEach(row=>{
 const text = row[0];
 if(!text) return;
 
-const customer = getValue(text,"CUSTOMER");
-const wa1 = getValue(text,"WA1");
-const wa2 = getValue(text,"WA2");
+const customer = getVal(text,"CUSTOMER");
+const wa1 = getVal(text,"WA1");
+const wa2 = getVal(text,"WA2");
 
 html += `
 <div class="card">
 
 ${text}
 
-<button onclick="kirim('${customer}')">TERKIRIM</button>
+<div class="aksi">
+
+${wa1 ? `<a class="wa" href="https://wa.me/62${wa1.substring(1)}" target="_blank">WA 1</a>` : ""}
+
+${wa2 ? `<a class="wa" href="https://wa.me/62${wa2.substring(1)}" target="_blank">WA 2</a>` : ""}
+
+<button class="kirim" onclick="kirim('${customer}')">
+TERKIRIM
+</button>
+
+</div>
 
 </div>
 `;
@@ -85,8 +130,14 @@ driver: driver
 })
 .then(r=>r.text())
 .then(res=>{
-alert(res);
-loadData();
+
+if(res=="OK"){
+  alert("TERKIRIM: " + customer);
+  loadData();
+}else{
+  alert("NOT FOUND: " + customer);
+}
+
 });
 
 }
