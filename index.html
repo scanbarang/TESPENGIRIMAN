@@ -52,7 +52,6 @@ body{
 .total{
   font-size:13px;
   font-weight:bold;
-  margin-top:2px;
 }
 
 /* CARD */
@@ -62,27 +61,24 @@ body{
   margin-bottom:6px;
   border-radius:8px;
   box-shadow:0 1px 4px rgba(0,0,0,.08);
-
-  /* hilangkan spasi atas kosong */
-  white-space:pre-line;
+  white-space:pre-wrap;
   font-size:13px;
   line-height:1.3;
 }
 
-/* ACTION ROW */
+/* ACTION */
 .aksi{
   margin-top:6px;
   display:flex;
+  gap:4px;
   align-items:center;
-  justify-content:space-between;
-  gap:5px;
 }
 
 /* WA BUTTON */
 a{
   text-decoration:none;
-  padding:5px 8px;
-  border-radius:6px;
+  padding:4px 6px;
+  border-radius:5px;
   color:white;
   font-size:11px;
   flex:1;
@@ -92,15 +88,18 @@ a{
 .wa1{background:#25D366;}
 .wa2{background:#128C7E;}
 
-/* BUTTON TERKIRIM */
+/* KIRIM BUTTON */
 .btn{
-  padding:5px 10px;
+  padding:4px 6px;
   border:none;
-  border-radius:6px;
+  border-radius:5px;
   cursor:pointer;
   font-size:11px;
   font-weight:bold;
   flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .kirim{
@@ -130,6 +129,7 @@ a{
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwmXMx6F6-XjjsikpofXZfWJWNsnEEliyQCoFkVCMZzfn9rfAQRaJmdu8niM63p9zEE/exec";
 
+/* LOAD DATA */
 function loadData(){
 
 fetch(API_URL + "?t=" + new Date().getTime())
@@ -162,6 +162,7 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
     const sudah = status === "TERKIRIM";
 
+    /* WA AUTO DETECT */
     let found = isi.match(/08\d{8,13}/g) || [];
     let wa1 = found[0] || "";
     let wa2 = found[1] || "";
@@ -207,20 +208,34 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
   document.getElementById("list").innerHTML = html;
 
+})
+.catch(err => {
+  console.log(err);
+  document.getElementById("list").innerHTML = "❌ Gagal load data";
 });
 
 }
 
+/* KIRIM STATUS */
 function kirimStatus(customer){
+
+const driver = localStorage.getItem("driver") || "DRIVER";
 
 fetch(API_URL,{
 method:"POST",
 body:JSON.stringify({
 customer:customer,
-status:"TERKIRIM"
+driver:driver
 })
 })
-.then(()=>loadData());
+.then(r => r.text())
+.then(res => {
+
+  console.log("RESPON:", res);
+
+  loadData();
+
+});
 
 }
 
