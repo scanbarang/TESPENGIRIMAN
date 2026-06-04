@@ -7,75 +7,40 @@
 
 <style>
 body{
+  font-family:Arial;
+  background:#f5f7fa;
   margin:0;
   padding:10px;
-  background:#f5f7fa;
-  font-family:Arial,sans-serif;
 }
 
 .header{
   background:#1565c0;
   color:white;
-  padding:10px;
-  border-radius:12px;
+  padding:15px;
   text-align:center;
-  margin-bottom:8px;
-}
-
-.header img{
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  border:3px solid #22c55e;
-}
-
-.header h2{
-  margin:5px 0 0 0;
-  font-size:18px;
-}
-
-.jumlah{
-  text-align:center;
-  margin-bottom:8px;
-}
-
-.tanggal-besar{
-  font-size:18px;
-  font-weight:bold;
-  color:#1565c0;
-}
-
-.total{
-  font-size:14px;
-  font-weight:bold;
+  border-radius:10px;
+  margin-bottom:10px;
 }
 
 .card{
   background:white;
-  border-radius:12px;
   padding:10px;
-  margin-bottom:8px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-  white-space:pre-wrap;
-  line-height:1.4;
-  font-size:14px;
+  margin-bottom:10px;
+  border-radius:10px;
+  box-shadow:0 2px 5px rgba(0,0,0,.1);
 }
 
 .aksi{
-  margin-top:6px;
-  display:flex;
-  gap:5px;
-  flex-wrap:wrap;
+  margin-top:10px;
 }
 
 .wa-btn{
   background:#25D366;
   color:white;
   padding:6px 10px;
-  border-radius:8px;
   text-decoration:none;
-  font-weight:bold;
-  font-size:13px;
+  border-radius:6px;
+  margin-right:5px;
 }
 
 .kirim-btn{
@@ -83,229 +48,78 @@ body{
   color:white;
   padding:6px 10px;
   border:none;
-  border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
-  font-size:13px;
-}
-
-.kirim-btn:disabled{
-  background:#16a34a;
-}
-
-/* LOGIN */
-#loginBox{
-  position:fixed;
-  inset:0;
-  background:#0f172a;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:9999;
-}
-
-#loginBox > div{
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  width:85%;
-  max-width:300px;
-  text-align:center;
-}
-
-#loginBox input, #loginBox select{
-  width:100%;
-  padding:8px;
-  margin-bottom:10px;
-}
-
-#loginBox button{
-  width:100%;
-  padding:8px;
-  background:#1565c0;
-  color:white;
-  border:none;
-  border-radius:8px;
+  border-radius:6px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="loginBox">
-  <div>
-    <h3>LOGIN PENGIRIMAN</h3>
-
-    <select id="user">
-      <option value="">-- Pilih Nama --</option>
-      <option value="Poniadi">Poniadi</option>
-      <option value="Eko">Eko</option>
-      <option value="Sendi">Sendi</option>
-    </select>
-
-    <input id="pin" type="password" placeholder="PIN">
-
-    <button onclick="login()">LOGIN</button>
-  </div>
-</div>
-
-<!-- HEADER -->
 <div class="header">
-  <img src="logo.png">
   <h2>CEK PENGIRIMAN</h2>
 </div>
 
-<div style="background:white;padding:10px;border-radius:12px;margin-bottom:8px;">
-  <h3 style="margin:0;">Pengiriman Aktif</h3>
-  <div id="driverShow"></div>
-</div>
-
-<div id="jumlah" class="jumlah">Memuat data...</div>
-<div id="list"></div>
+<div id="list">Memuat data...</div>
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwmXMx6F6-XjjsikpofXZfWJWNsnEEliyQCoFkVCMZzfn9rfAQRaJmdu8niM63p9zEE/exec";
+const API_URL = "https://script.google.com/macros/s/XXXXXXXX/exec";
 
-/* LOGIN */
-const users = {
-  "Poniadi":"1111",
-  "Eko":"2222",
-  "Sendi":"3333"
-};
-
-function login(){
-  const user = document.getElementById("user").value;
-  const pin = document.getElementById("pin").value;
-
-  if(users[user] === pin){
-    localStorage.setItem("driver", user);
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("driverShow").innerHTML="Driver: <b>"+user+"</b>";
-    loadData();
-  } else {
-    alert("PIN salah!");
-  }
-}
-
-/* LOAD DATA - FULL SAFE VERSION */
 function loadData(){
 
 fetch(API_URL + "?t=" + new Date().getTime())
-.then(r => r.json())
-.then(data => {
+.then(r=>r.json())
+.then(data=>{
 
 let html = "";
-let total = 0;
-let tanggal = "";
 
-data.forEach(row => {
+data.forEach(row=>{
 
-try {
-
-const tanggalRow = row[0];
 const customer = row[1];
 const status = row[2] || "";
-const pengiriman = row[3] || "";
-const jam = row[4] || "";
 const wa = row[6] || "";
 
-if(!customer) return;
-
-total++;
-
-if(!tanggal && tanggalRow){
-tanggal = new Date(tanggalRow).toLocaleDateString("id-ID",{day:"2-digit",month:"long",year:"numeric"});
-}
-
-/* SAFE WA */
-let waLink = "#";
-if(wa && wa.length > 3){
-waLink = "https://wa.me/62" + wa.substring(1);
-}
-
-/* STATUS CONTROL */
-const sudahKirim = status === "TERKIRIM";
-const btnText = sudahKirim ? "🟢 SUDAH TERKIRIM" : "✅ TERKIRIM";
-const disabled = sudahKirim ? "disabled" : "";
+const sudah = status === "TERKIRIM";
 
 html += `
 <div class="card">
 
-${customer}  
-${pengiriman ? "Driver: "+pengiriman : ""}  
-${jam ? "Jam: "+jam : ""}
+<p>${customer}</p>
 
 <div class="aksi">
 
-<a class="wa-btn" href="${waLink}" target="_blank">💬 WA</a>
+<a class="wa-btn" href="https://wa.me/62${wa.substring(1)}" target="_blank">WA</a>
 
-<button class="kirim-btn" ${disabled}
-onclick="kirimStatus(this,'${customer}')">
-${btnText}
+<button class="kirim-btn" ${sudah ? "disabled" : ""}
+onclick="kirimStatus('${customer}')">
+${sudah ? "SUDAH TERKIRIM" : "TERKIRIM"}
 </button>
 
 </div>
 
 </div>
 `;
-
-} catch(err){
-console.log("ROW ERROR:", err);
-}
-
 });
-
-document.getElementById("jumlah").innerHTML =
-`<div class="tanggal-besar">🗓️ ${tanggal}</div>
-<div class="total">Total Pengiriman : ${total}</div>`;
 
 document.getElementById("list").innerHTML = html;
 
-})
-.catch(err => {
-console.log("FETCH ERROR:", err);
-document.getElementById("jumlah").innerHTML = "❌ Gagal memuat data";
 });
 
 }
 
-/* KIRIM STATUS */
-function kirimStatus(btn,customer){
-
-const driver = localStorage.getItem("driver");
+function kirimStatus(customer){
 
 fetch(API_URL,{
 method:"POST",
 body:JSON.stringify({
 customer:customer,
-status:"TERKIRIM",
-driver:driver
+driver:""
 })
-})
-.then(r=>r.text())
-.then(res=>{
-
-btn.innerHTML="🟢 SUDAH TERKIRIM";
-btn.disabled=true;
-
-loadData(); // 🔥 AUTO SYNC SEMUA DEVICE
-
-});
+}).then(()=>loadData());
 
 }
 
-/* AUTO LOGIN */
-window.onload=function(){
-const driver = localStorage.getItem("driver");
-
-if(driver){
-document.getElementById("loginBox").style.display="none";
-document.getElementById("driverShow").innerHTML="Driver: <b>"+driver+"</b>";
 loadData();
-}
-};
 
 </script>
 
