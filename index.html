@@ -168,13 +168,13 @@ body{
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwmXMx6F6-XjjsikpofXZfWJWNsnEEliyQCoFkVCMZzfn9rfAQRaJmdu8niM63p9zEE/exec";
 
+/* LOGIN */
 const users = {
   "Poniadi":"1111",
   "Eko":"2222",
   "Sendi":"3333"
 };
 
-/* LOGIN */
 function login(){
   const user = document.getElementById("user").value;
   const pin = document.getElementById("pin").value;
@@ -189,25 +189,27 @@ function login(){
   }
 }
 
-/* LOAD DATA */
+/* LOAD DATA - FULL SAFE VERSION */
 function loadData(){
 
 fetch(API_URL + "?t=" + new Date().getTime())
-.then(r=>r.json())
-.then(data=>{
+.then(r => r.json())
+.then(data => {
 
 let html = "";
 let total = 0;
 let tanggal = "";
 
-data.forEach(row=>{
+data.forEach(row => {
+
+try {
 
 const tanggalRow = row[0];
 const customer = row[1];
-const status = row[2];
-const pengiriman = row[3];
-const jam = row[4];
-const wa = row[6];
+const status = row[2] || "";
+const pengiriman = row[3] || "";
+const jam = row[4] || "";
+const wa = row[6] || "";
 
 if(!customer) return;
 
@@ -217,13 +219,15 @@ if(!tanggal && tanggalRow){
 tanggal = new Date(tanggalRow).toLocaleDateString("id-ID",{day:"2-digit",month:"long",year:"numeric"});
 }
 
-/* 🔥 FIX STATUS INI YANG PENTING */
+/* SAFE WA */
+let waLink = "#";
+if(wa && wa.length > 3){
+waLink = "https://wa.me/62" + wa.substring(1);
+}
+
+/* STATUS CONTROL */
 const sudahKirim = status === "TERKIRIM";
-
-const btnText = sudahKirim
-  ? "🟢 SUDAH TERKIRIM"
-  : "✅ TERKIRIM";
-
+const btnText = sudahKirim ? "🟢 SUDAH TERKIRIM" : "✅ TERKIRIM";
 const disabled = sudahKirim ? "disabled" : "";
 
 html += `
@@ -235,7 +239,7 @@ ${jam ? "Jam: "+jam : ""}
 
 <div class="aksi">
 
-<a class="wa-btn" href="https://wa.me/62${wa.substring(1)}" target="_blank">💬 WA</a>
+<a class="wa-btn" href="${waLink}" target="_blank">💬 WA</a>
 
 <button class="kirim-btn" ${disabled}
 onclick="kirimStatus(this,'${customer}')">
@@ -246,6 +250,11 @@ ${btnText}
 
 </div>
 `;
+
+} catch(err){
+console.log("ROW ERROR:", err);
+}
+
 });
 
 document.getElementById("jumlah").innerHTML =
@@ -254,6 +263,10 @@ document.getElementById("jumlah").innerHTML =
 
 document.getElementById("list").innerHTML = html;
 
+})
+.catch(err => {
+console.log("FETCH ERROR:", err);
+document.getElementById("jumlah").innerHTML = "❌ Gagal memuat data";
 });
 
 }
@@ -277,7 +290,7 @@ driver:driver
 btn.innerHTML="🟢 SUDAH TERKIRIM";
 btn.disabled=true;
 
-loadData(); // 🔥 WAJIB SUPAYA LANGSUNG UPDATE SEMUA
+loadData(); // 🔥 AUTO SYNC SEMUA DEVICE
 
 });
 
