@@ -65,6 +65,22 @@ body{
 </div>
 
 
+<div style="background:white;padding:15px;border-radius:15px;margin-bottom:15px;box-shadow:0 3px 10px rgba(0,0,0,.15);">
+
+<h3>Pilih Pengiriman</h3>
+
+<select id="pengiriman" style="width:100%;padding:10px;font-size:16px;">
+<option value="">-- Pilih Nama --</option>
+<option>Poniadi</option>
+<option>Eko</option>
+<option>Sendi</option>
+<option>Dwi</option>
+<option>Friza</option>
+<option>Rudi</option>
+</select>
+
+</div>
+
 <div id="jumlah" class="jumlah">
 Memuat data...
 </div>
@@ -105,11 +121,61 @@ fetch(API_URL)
 
     }
 
-    html += `
-    <div class="card">
+    const wa1Match = isi.match(/WA 1 : ([0-9]+)/);
+const wa2Match = isi.match(/WA 2 : ([0-9]+)/);
+const customerMatch = isi.match(/CUSTOMER : (.*)/);
+
+const wa1 = wa1Match ? wa1Match[1] : "";
+const wa2 = wa2Match ? wa2Match[1] : "";
+const customer = customerMatch ? customerMatch[1].trim() : "";
+
+html += `
+<div class="card">
+
 ${isi}
-    </div>
-    `;
+
+<br><br>
+
+<a href="https://wa.me/62${wa1.substring(1)}"
+target="_blank"
+style="
+display:inline-block;
+padding:10px;
+background:#25D366;
+color:white;
+text-decoration:none;
+border-radius:10px;
+margin:3px;">
+💬 WA 1
+</a>
+
+<a href="https://wa.me/62${wa2.substring(1)}"
+target="_blank"
+style="
+display:inline-block;
+padding:10px;
+background:#25D366;
+color:white;
+text-decoration:none;
+border-radius:10px;
+margin:3px;">
+💬 WA 2
+</a>
+
+<button
+onclick="kirimStatus('${customer}','${wa1}')"
+style="
+padding:10px;
+background:#1565c0;
+color:white;
+border:none;
+border-radius:10px;
+margin:3px;">
+✅ TERKIRIM
+</button>
+
+</div>
+`;
 
   });
 
@@ -134,7 +200,45 @@ ${isi}
   console.log(err);
 
 });
+function kirimStatus(customer,wa){
 
+const pengiriman =
+document.getElementById("pengiriman").value;
+
+if(!pengiriman){
+
+alert("Pilih nama pengiriman terlebih dahulu");
+
+return;
+
+}
+
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+customer:customer,
+status:"TERKIRIM",
+pengiriman:pengiriman,
+catatan:"",
+wa:wa
+})
+})
+.then(r=>r.text())
+.then(res=>{
+
+alert(
+customer +
+" berhasil ditandai TERKIRIM"
+);
+
+})
+.catch(err=>{
+
+alert("Gagal : " + err);
+
+});
+
+}
 </script>
 
 </body>
