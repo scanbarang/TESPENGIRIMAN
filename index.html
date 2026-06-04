@@ -6,12 +6,11 @@
 <title>Pengiriman</title>
 
 <style>
-
 body{
   margin:0;
   padding:8px;
+  font-family:Arial;
   background:#f5f7fa;
-  font-family:Arial,sans-serif;
 }
 
 /* HEADER */
@@ -19,39 +18,27 @@ body{
   background:#1565c0;
   color:white;
   padding:10px;
-  border-radius:10px;
   text-align:center;
+  border-radius:10px;
   margin-bottom:8px;
 }
 
 .header img{
-  width:60px;
-  height:60px;
+  width:55px;
+  height:55px;
   border-radius:50%;
-  object-fit:cover;
-  border:2px solid white;
-}
-
-.header h2{
-  margin:5px 0 0 0;
-  font-size:15px;
 }
 
 /* INFO */
-.jumlah{
+#jumlah{
   text-align:center;
-  margin-bottom:8px;
+  margin:8px 0;
 }
 
-.tanggal-besar{
-  font-size:20px;
+.tanggal{
+  font-size:18px;
   font-weight:bold;
   color:#1565c0;
-}
-
-.total{
-  font-size:13px;
-  font-weight:bold;
 }
 
 /* CARD */
@@ -60,58 +47,40 @@ body{
   padding:8px;
   margin-bottom:6px;
   border-radius:8px;
-  box-shadow:0 1px 4px rgba(0,0,0,.08);
-  white-space:pre-wrap;
   font-size:13px;
-  line-height:1.3;
+  white-space:pre-wrap;
 }
 
 /* ACTION */
 .aksi{
-  margin-top:6px;
   display:flex;
   gap:4px;
-  align-items:center;
+  margin-top:6px;
 }
 
-/* WA BUTTON */
-a{
+a, button{
   flex:1;
+  padding:6px;
+  font-size:11px;
+  border-radius:6px;
   text-align:center;
-  padding:5px 6px;
-  border-radius:6px;
-  color:white;
-  font-size:11px;
-  text-decoration:none;
-}
-
-.wa1{background:#25D366;}
-.wa2{background:#128C7E;}
-
-/* KIRIM BUTTON */
-.btn{
-  flex:1;
-  padding:5px 6px;
   border:none;
-  border-radius:6px;
-  font-size:11px;
-  font-weight:bold;
   cursor:pointer;
-  display:flex;
-  align-items:center;
-  justify-content:center;
 }
 
+/* WA */
+.wa1{background:#25D366;color:white;text-decoration:none;}
+.wa2{background:#128C7E;color:white;text-decoration:none;}
+
+/* KIRIM */
 .kirim{
   background:#1565c0;
   color:white;
 }
-
 .sudah{
   background:#16a34a;
   color:white;
 }
-
 </style>
 </head>
 
@@ -119,24 +88,27 @@ a{
 
 <div class="header">
   <img src="logo.png">
-  <h2>CEK PENGIRIMAN</h2>
+  <div>CEK PENGIRIMAN</div>
 </div>
 
-<div id="jumlah">Memuat data...</div>
+<div id="jumlah">Loading...</div>
 <div id="list"></div>
 
 <script>
 
-const API_URL = "const API_URL = "https://script.google.com/macros/s/AKfycbxuDE6FlKICIcXm24k8UPP8GW7MPlPAOrqkGyyZCO11CKGj_tYbhKx7CSyrXqXFGpAA/exec";
+/* 🔥 PASTIKAN INI BENAR */
+const API_URL = "https://script.google.com/macros/s/AKfycbxuDE6FlKICIcXm24k8UPP8GW7MPlPAOrqkGyyZCO11CKGj_tYbhKx7CSyrXqXFGpAA/exec";
 
-/* LOAD DATA */
+/* =====================
+   LOAD DATA (SAFE)
+===================== */
 function loadData(){
 
 fetch(API_URL + "?t=" + new Date().getTime())
 .then(r => r.text())
-.then(text => {
+.then(txt => {
 
-  let data = JSON.parse(text);
+  let data = JSON.parse(txt);
 
   let html = "";
   let total = 0;
@@ -153,70 +125,72 @@ fetch(API_URL + "?t=" + new Date().getTime())
     total++;
 
     if(!tanggal && tgl){
-      tanggal = new Date(tgl).toLocaleDateString("id-ID",{
-        day:"2-digit",
-        month:"long",
-        year:"numeric"
-      });
+      tanggal = new Date(tgl).toLocaleDateString("id-ID",{day:"2-digit",month:"long",year:"numeric"});
     }
 
     const sudah = status === "TERKIRIM";
 
-    let found = isi.match(/08\d{8,13}/g) || [];
-    let wa1 = found[0] || "";
-    let wa2 = found[1] || "";
+    /* ambil WA */
+    let wa = isi.match(/08\d{8,13}/g) || [];
+    let wa1 = wa[0] || "";
+    let wa2 = wa[1] || "";
 
-    let waButtons = "";
+    let waBtn = "";
 
     if(wa1){
-      waButtons += `<a class="wa1" href="https://wa.me/62${wa1.substring(1)}" target="_blank">WA 1</a>`;
+      waBtn += `<a class="wa1" href="https://wa.me/62${wa1.substring(1)}" target="_blank">WA 1</a>`;
     }
-
     if(wa2){
-      waButtons += `<a class="wa2" href="https://wa.me/62${wa2.substring(1)}" target="_blank">WA 2</a>`;
+      waBtn += `<a class="wa2" href="https://wa.me/62${wa2.substring(1)}" target="_blank">WA 2</a>`;
     }
 
     html += `
       <div class="card">
-
         ${isi}
 
         <div class="aksi">
+          ${waBtn}
 
-          ${waButtons}
-
-          <button class="btn ${sudah?'sudah':'kirim'}"
+          <button class="${sudah?'sudah':'kirim'}"
             onclick="kirimStatus('${isi.replace(/'/g,'')}')"
             ${sudah?'disabled':''}>
-
             ${sudah?'TERKIRIM':'KIRIM'}
-
           </button>
 
         </div>
-
       </div>
     `;
 
   });
 
   document.getElementById("jumlah").innerHTML = `
-    <div class="tanggal-besar">📅 ${tanggal}</div>
-    <div class="total">TOTAL PENGIRIMAN HARI INI: ${total}</div>
+    <div class="tanggal">📅 ${tanggal}</div>
+    <div>Total Pengiriman: ${total}</div>
   `;
 
   document.getElementById("list").innerHTML = html;
 
+})
+.catch(err => {
+  document.getElementById("jumlah").innerHTML = "GAGAL LOAD DATA";
+  console.log(err);
 });
 
 }
 
-/* KIRIM STATUS (PASTI JALAN) */
+/* =====================
+   KIRIM STATUS (FIXED)
+===================== */
 function kirimStatus(customer){
 
 const driver = localStorage.getItem("driver") || "DRIVER";
 
-fetch(API_URL + "?customer=" + encodeURIComponent(customer) + "&driver=" + encodeURIComponent(driver))
+const url =
+API_URL +
+"?customer=" + encodeURIComponent(customer) +
+"&driver=" + encodeURIComponent(driver);
+
+fetch(url)
 .then(r => r.text())
 .then(res => {
 
@@ -230,8 +204,8 @@ fetch(API_URL + "?customer=" + encodeURIComponent(customer) + "&driver=" + encod
 
 })
 .catch(err => {
+  alert("Server error");
   console.log(err);
-  alert("Error koneksi ke server");
 });
 
 }
