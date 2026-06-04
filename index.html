@@ -1,132 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pengiriman</title>
+const SHEET_NAME = "PDF BESOK";
 
-<style>
+function doGet() {
+  try {
 
-body{
-  margin:0;
-  padding:15px;
-  background:#f5f7fa;
-  font-family:Arial,sans-serif;
+    const ss = SpreadsheetApp.openById(SpreadsheetApp.getActiveSpreadsheet().getId());
+    const sheet = ss.getSheetByName(SHEET_NAME);
+
+    if (!sheet) {
+      return ContentService.createTextOutput("SHEET_NOT_FOUND");
+    }
+
+    const data = sheet.getDataRange().getValues();
+
+    return ContentService
+      .createTextOutput(JSON.stringify(data))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService.createTextOutput("ERROR: " + err);
+  }
 }
-
-.header{
-  background:#1565c0;
-  color:white;
-  padding:20px;
-  border-radius:15px;
-  text-align:center;
-  font-size:24px;
-  margin-bottom:15px;
-}
-
-.card{
-  background:white;
-  padding:15px;
-  margin-bottom:10px;
-  border-radius:12px;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
-  white-space:pre-wrap;
-  line-height:1.5;
-}
-
-.jumlah{
-  text-align:center;
-  margin-bottom:15px;
-}
-
-.tanggal-besar{
-  font-size:20px;
-  font-weight:bold;
-  color:#1565c0;
-}
-
-.total{
-  font-weight:bold;
-  margin-top:5px;
-}
-
-</style>
-</head>
-
-<body>
-
-<div class="header">
-  CEK PENGIRIMAN
-</div>
-
-<div id="jumlah">Memuat data...</div>
-<div id="list"></div>
-
-<script>
-
-const API_URL =
-"https://script.google.com/macros/s/AKfycbykT2QFJ_BtyUaXbMAlCwPqdQFiS09U3gVUQXRZR4ufbyf8hpj6oZcQ5jTiLthzFBjt/exec";
-
-function loadData(){
-
-fetch(API_URL + "?t=" + new Date().getTime())
-.then(r => r.json())
-.then(data => {
-
-let html = "";
-let total = 0;
-let tanggal = "";
-
-data.forEach(row => {
-
-try {
-
-const isi = row[0];
-const tgl = row[1];
-
-if(!isi) return;
-
-total++;
-
-if(!tanggal && tgl){
-tanggal = new Date(tgl).toLocaleDateString("id-ID",{
-day:"2-digit",
-month:"long",
-year:"numeric"
-});
-}
-
-html += `
-<div class="card">
-${isi}
-</div>
-`;
-
-} catch(e){
-console.log("error row", e);
-}
-
-});
-
-document.getElementById("jumlah").innerHTML =
-`
-<div class="tanggal-besar">📅 ${tanggal}</div>
-<div class="total">Total Pengiriman: ${total}</div>
-`;
-
-document.getElementById("list").innerHTML = html;
-
-})
-.catch(err => {
-console.log(err);
-document.getElementById("jumlah").innerHTML = "❌ Gagal mengambil data";
-});
-
-}
-
-loadData();
-
-</script>
-
-</body>
-</html>
