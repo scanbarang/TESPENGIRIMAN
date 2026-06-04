@@ -1,106 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pengiriman</title>
-
-<style>
-body{
-  margin:0;
-  padding:15px;
-  background:#f5f7fa;
-  font-family:Arial,sans-serif;
-}
-
-.header{
-  background:#1565c0;
-  color:white;
-  padding:20px;
-  border-radius:15px;
-  text-align:center;
-  font-size:22px;
-  margin-bottom:15px;
-}
-
-.card{
-  background:white;
-  padding:15px;
-  margin-bottom:10px;
-  border-radius:12px;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
-  white-space:pre-wrap;
-}
-
-.aksi{
-  margin-top:10px;
-  display:flex;
-  gap:5px;
-  flex-wrap:wrap;
-}
-
-a{
-  text-decoration:none;
-  padding:6px 10px;
-  border-radius:6px;
-  color:white;
-  font-size:13px;
-}
-
-.wa1{background:#25D366;}
-.wa2{background:#128C7E;}
-
-.btn{
-  padding:6px 10px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  font-size:13px;
-}
-
-.kirim{
-  background:#1565c0;
-  color:white;
-}
-
-.sudah{
-  background:green;
-  color:white;
-}
-
-.jumlah{
-  text-align:center;
-  margin-bottom:15px;
-}
-
-.tanggal-besar{
-  font-size:18px;
-  font-weight:bold;
-  color:#1565c0;
-}
-
-.total{
-  font-weight:bold;
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">CEK PENGIRIMAN</div>
-
-<div id="jumlah">Memuat data...</div>
-<div id="list"></div>
-
-<script>
-
-const API_URL = "https://script.google.com/macros/s/AKfycbwmXMx6F6-XjjsikpofXZfWJWNsnEEliyQCoFkVCMZzfn9rfAQRaJmdu8niM63p9zEE/exec";
-
-function cleanWA(num){
-  if(!num) return "";
-  return String(num).replace(/\D/g,''); // hanya angka
-}
-
 function loadData(){
 
 fetch(API_URL + "?t=" + new Date().getTime())
@@ -119,10 +16,6 @@ fetch(API_URL + "?t=" + new Date().getTime())
     const tgl = row[1];
     const status = row[2] || "";
 
-    // ⚠️ WA INDEX AMAN (jika sheet beda posisi, tetap aman)
-    const wa1 = cleanWA(row[6]);
-    const wa2 = cleanWA(row[7]);
-
     if(!isi) return;
 
     total++;
@@ -137,14 +30,24 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
     const sudah = status === "TERKIRIM";
 
+    /* 🔥 AMBIL WA DARI TEKS ORDER (ISI) */
+    let wa1 = "";
+    let wa2 = "";
+
+    const wa1Match = isi.match(/WA\s*1\s*[:\-]?\s*(08\d{8,13})/i);
+    const wa2Match = isi.match(/WA\s*2\s*[:\-]?\s*(08\d{8,13})/i);
+
+    if(wa1Match) wa1 = wa1Match[1];
+    if(wa2Match) wa2 = wa2Match[1];
+
     let waButtons = "";
 
-    if(wa1 && wa1.length > 8){
-      waButtons += `<a class="wa1" href="https://wa.me/62${wa1.slice(1)}" target="_blank">WA 1</a>`;
+    if(wa1){
+      waButtons += `<a class="wa1" href="https://wa.me/62${wa1.substring(1)}" target="_blank">WA 1</a>`;
     }
 
-    if(wa2 && wa2.length > 8){
-      waButtons += `<a class="wa2" href="https://wa.me/62${wa2.slice(1)}" target="_blank">WA 2</a>`;
+    if(wa2){
+      waButtons += `<a class="wa2" href="https://wa.me/62${wa2.substring(1)}" target="_blank">WA 2</a>`;
     }
 
     html += `
@@ -178,26 +81,10 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
   document.getElementById("list").innerHTML = html;
 
+})
+.catch(err => {
+  console.log(err);
+  document.getElementById("list").innerHTML = "❌ Gagal load data";
 });
 
 }
-
-function kirimStatus(customer){
-
-fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({
-customer:customer,
-status:"TERKIRIM"
-})
-})
-.then(()=>loadData());
-
-}
-
-loadData();
-
-</script>
-
-</body>
-</html>
