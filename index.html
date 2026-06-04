@@ -13,7 +13,6 @@ body{
   font-family:Arial,sans-serif;
 }
 
-/* HEADER */
 .header{
   background:#1565c0;
   color:white;
@@ -36,7 +35,6 @@ body{
   font-size:18px;
 }
 
-/* INFO */
 .jumlah{
   text-align:center;
   margin-bottom:8px;
@@ -46,7 +44,6 @@ body{
   font-size:18px;
   font-weight:bold;
   color:#1565c0;
-  margin-bottom:2px;
 }
 
 .total{
@@ -54,7 +51,6 @@ body{
   font-weight:bold;
 }
 
-/* CARD */
 .card{
   background:white;
   border-radius:12px;
@@ -66,20 +62,14 @@ body{
   font-size:14px;
 }
 
-.card p{margin:0;}
-
-/* AKSI */
 .aksi{
   margin-top:6px;
   display:flex;
-  flex-wrap:wrap;
   gap:5px;
+  flex-wrap:wrap;
 }
 
 .wa-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
   background:#25D366;
   color:white;
   padding:6px 10px;
@@ -87,7 +77,6 @@ body{
   text-decoration:none;
   font-weight:bold;
   font-size:13px;
-  margin:0;
 }
 
 .kirim-btn{
@@ -99,7 +88,6 @@ body{
   font-weight:bold;
   cursor:pointer;
   font-size:13px;
-  margin:0;
 }
 
 /* LOGIN */
@@ -136,7 +124,6 @@ body{
   border:none;
   border-radius:8px;
 }
-
 </style>
 </head>
 
@@ -157,8 +144,6 @@ body{
     <input id="pin" type="password" placeholder="PIN">
 
     <button onclick="login()">LOGIN</button>
-
-    <p id="loginError" style="color:red;font-size:12px;"></p>
   </div>
 </div>
 
@@ -168,9 +153,8 @@ body{
   <h2>CEK PENGIRIMAN</h2>
 </div>
 
-<!-- PILIH (tidak terlalu penting lagi tapi tetap ada) -->
 <div style="background:white;padding:10px;border-radius:12px;margin-bottom:8px;">
-<h3 style="margin:0 0 6px 0;">Pengiriman Aktif</h3>
+<h3 style="margin:0;">Pengiriman Aktif</h3>
 <div id="driverShow"></div>
 </div>
 
@@ -181,25 +165,24 @@ body{
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwmXMx6F6-XjjsikpofXZfWJWNsnEEliyQCoFkVCMZzfn9rfAQRaJmdu8niM63p9zEE/exec";
 
-/* LOGIN DATA */
 const users = {
   "Poniadi":"1111",
   "Eko":"2222",
-  "Sendi":"3333",
-  
+  "Sendi":"3333"
 };
 
+/* LOGIN */
 function login(){
   const user = document.getElementById("user").value;
   const pin = document.getElementById("pin").value;
 
   if(users[user] === pin){
     localStorage.setItem("driver", user);
-    document.getElementById("loginBox").style.display = "none";
-    document.getElementById("driverShow").innerHTML = "Driver: <b>"+user+"</b>";
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("driverShow").innerHTML="Driver: <b>"+user+"</b>";
     loadData();
   } else {
-    document.getElementById("loginError").innerText = "PIN salah!";
+    alert("PIN salah!");
   }
 }
 
@@ -216,10 +199,7 @@ let tanggalPengiriman = "";
 
 data.forEach(row=>{
 
-const isi = (row[0]||"")
-.replace(/\n\s*\n+/g,"\n")
-.trim();
-
+const isi = (row[0]||"").replace(/\n\s*\n+/g,"\n").trim();
 if(!isi) return;
 
 total++;
@@ -239,14 +219,13 @@ const customer = customerMatch ? customerMatch[1].trim() : "";
 
 html += `
 <div class="card">
-
 ${isi}
 
 <div class="aksi">
-<a href="https://wa.me/62${wa1.substring(1)}" target="_blank" class="wa-btn">💬 WA 1</a>
-<a href="https://wa.me/62${wa2.substring(1)}" target="_blank" class="wa-btn">💬 WA 2</a>
+<a class="wa-btn" href="https://wa.me/62${wa1.substring(1)}" target="_blank">💬 WA 1</a>
+<a class="wa-btn" href="https://wa.me/62${wa2.substring(1)}" target="_blank">💬 WA 2</a>
 
-<button class="kirim-btn" onclick="kirimStatus(this,'${customer}','${wa1}')">
+<button class="kirim-btn" onclick="kirimStatus(this,'${customer}')">
 ✅ TERKIRIM
 </button>
 </div>
@@ -255,10 +234,9 @@ ${isi}
 `;
 });
 
-document.getElementById("jumlah").innerHTML = `
-<div class="tanggal-besar">🗓️ ${tanggalPengiriman}</div>
-<div class="total">Total Pengiriman : ${total}</div>
-`;
+document.getElementById("jumlah").innerHTML =
+`<div class="tanggal-besar">🗓️ ${tanggalPengiriman}</div>
+<div class="total">Total Pengiriman : ${total}</div>`;
 
 document.getElementById("list").innerHTML = html;
 
@@ -267,7 +245,7 @@ document.getElementById("list").innerHTML = html;
 }
 
 /* KIRIM STATUS */
-function kirimStatus(btn,customer,wa){
+function kirimStatus(btn,customer){
 
 const driver = localStorage.getItem("driver");
 
@@ -276,8 +254,8 @@ method:"POST",
 body:JSON.stringify({
 customer:customer,
 status:"TERKIRIM",
-pengiriman:driver,
-wa:wa
+driver:driver,
+wa:""
 })
 })
 .then(r=>r.text())
@@ -287,13 +265,13 @@ btn.innerHTML="🟢 SUDAH TERKIRIM";
 btn.disabled=true;
 btn.style.background="#16a34a";
 
-alert(customer+" berhasil dikirim");
+loadData(); // 🔥 AUTO REFRESH BIAR DRIVER LAIN LANGSUNG UPDATE
 
 });
 
 }
 
-/* AUTO LOGIN CHECK */
+/* AUTO LOGIN */
 window.onload = function(){
 const driver = localStorage.getItem("driver");
 
