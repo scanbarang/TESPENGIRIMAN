@@ -6,65 +6,66 @@
 <title>Pengiriman</title>
 
 <style>
+
 body{
   margin:0;
-  padding:10px;
-  font-family:Arial;
+  padding:15px;
   background:#f5f7fa;
+  font-family:Arial,sans-serif;
 }
 
 .header{
   background:#1565c0;
   color:white;
-  padding:12px;
+  padding:20px;
+  border-radius:15px;
   text-align:center;
-  border-radius:10px;
-  margin-bottom:10px;
+  font-size:24px;
+  margin-bottom:15px;
 }
 
 .card{
   background:white;
-  padding:10px;
+  padding:15px;
   margin-bottom:10px;
-  border-radius:10px;
+  border-radius:12px;
   box-shadow:0 2px 6px rgba(0,0,0,.1);
+  white-space:pre-wrap;
+  line-height:1.5;
 }
 
-.aksi{
-  margin-top:8px;
-  display:flex;
-  gap:5px;
+.jumlah{
+  text-align:center;
+  margin-bottom:15px;
 }
 
-.wa-btn{
-  background:#25D366;
-  color:white;
-  padding:6px 10px;
-  border-radius:6px;
-  text-decoration:none;
+.tanggal-besar{
+  font-size:20px;
+  font-weight:bold;
+  color:#1565c0;
 }
 
-.kirim-btn{
-  background:#1565c0;
-  color:white;
-  padding:6px 10px;
-  border:none;
-  border-radius:6px;
+.total{
+  font-weight:bold;
+  margin-top:5px;
 }
+
 </style>
 </head>
 
 <body>
 
 <div class="header">
-  <h2>CEK PENGIRIMAN</h2>
+  CEK PENGIRIMAN
 </div>
 
-<div id="list">Memuat data...</div>
+<div id="jumlah">Memuat data...</div>
+<div id="list"></div>
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/XXXXX/exec";
+const API_URL =
+"https://script.google.com/macros/s/AKfycbykT2QFJ_BtyUaXbMAlCwPqdQFiS09U3gVUQXRZR4ufbyf8hpj6oZcQ5jTiLthzFBjt/exec";
 
 function loadData(){
 
@@ -73,43 +74,31 @@ fetch(API_URL + "?t=" + new Date().getTime())
 .then(data => {
 
 let html = "";
+let total = 0;
+let tanggal = "";
 
 data.forEach(row => {
 
 try {
 
-const customer = row[1];
-const status = row[2] || "";
-const driver = row[3] || "";
-const wa = row[6] || "";
+const isi = row[0];
+const tgl = row[1];
 
-if(!customer) return;
+if(!isi) return;
 
-/* SAFE WA */
-let waLink = "#";
-if(wa && wa.length > 3){
-waLink = "https://wa.me/62" + wa.substring(1);
+total++;
+
+if(!tanggal && tgl){
+tanggal = new Date(tgl).toLocaleDateString("id-ID",{
+day:"2-digit",
+month:"long",
+year:"numeric"
+});
 }
-
-const sudah = status === "TERKIRIM";
 
 html += `
 <div class="card">
-
-<p>${customer}</p>
-<p>${driver ? "Driver: "+driver : ""}</p>
-
-<div class="aksi">
-
-<a class="wa-btn" href="${waLink}" target="_blank">WA</a>
-
-<button class="kirim-btn" ${sudah ? "disabled" : ""}
-onclick="kirimStatus('${customer}')">
-${sudah ? "SUDAH TERKIRIM" : "TERKIRIM"}
-</button>
-
-</div>
-
+${isi}
 </div>
 `;
 
@@ -119,26 +108,19 @@ console.log("error row", e);
 
 });
 
+document.getElementById("jumlah").innerHTML =
+`
+<div class="tanggal-besar">📅 ${tanggal}</div>
+<div class="total">Total Pengiriman: ${total}</div>
+`;
+
 document.getElementById("list").innerHTML = html;
 
 })
 .catch(err => {
-console.log("FETCH ERROR:", err);
-document.getElementById("list").innerHTML = "Gagal load data";
+console.log(err);
+document.getElementById("jumlah").innerHTML = "❌ Gagal mengambil data";
 });
-
-}
-
-function kirimStatus(customer){
-
-fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({
-customer:customer,
-driver:""
-})
-})
-.then(()=>loadData());
 
 }
 
