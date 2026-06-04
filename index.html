@@ -20,7 +20,7 @@ body{
   padding:20px;
   border-radius:15px;
   text-align:center;
-  font-size:24px;
+  font-size:22px;
   margin-bottom:15px;
 }
 
@@ -33,20 +33,55 @@ body{
   white-space:pre-wrap;
 }
 
+.aksi{
+  margin-top:10px;
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+}
+
+a{
+  text-decoration:none;
+  padding:6px 10px;
+  border-radius:6px;
+  color:white;
+  font-size:13px;
+}
+
+.wa1{background:#25D366;}
+.wa2{background:#128C7E;}
+
+.btn{
+  padding:6px 10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:13px;
+}
+
+.kirim{
+  background:#1565c0;
+  color:white;
+}
+
+.sudah{
+  background:green;
+  color:white;
+}
+
 .jumlah{
   text-align:center;
   margin-bottom:15px;
 }
 
 .tanggal-besar{
-  font-size:20px;
+  font-size:18px;
   font-weight:bold;
   color:#1565c0;
 }
 
 .total{
   font-weight:bold;
-  margin-top:5px;
 }
 
 </style>
@@ -71,15 +106,7 @@ fetch(API_URL + "?t=" + new Date().getTime())
 .then(r => r.text())
 .then(text => {
 
-  let data;
-
-  try {
-    data = JSON.parse(text);
-  } catch(e){
-    document.getElementById("list").innerHTML = "❌ Data tidak valid";
-    console.log("RAW:", text);
-    return;
-  }
+  let data = JSON.parse(text);
 
   let html = "";
   let total = 0;
@@ -87,37 +114,62 @@ fetch(API_URL + "?t=" + new Date().getTime())
 
   data.forEach(row => {
 
-    try {
+    const isi = row[0];
+    const tgl = row[1];
+    const status = row[2] || "";
+    const wa1 = row[6] || "";
+    const wa2 = row[7] || "";
 
-      const isi = row[0];
-      const tgl = row[1];
+    if(!isi) return;
 
-      if(!isi) return;
+    total++;
 
-      total++;
-
-      if(!tanggal && tgl){
-        tanggal = new Date(tgl).toLocaleDateString("id-ID",{
-          day:"2-digit",
-          month:"long",
-          year:"numeric"
-        });
-      }
-
-      html += `
-        <div class="card">
-          ${isi}
-        </div>
-      `;
-
-    } catch(err){
-      console.log("ROW ERROR", err);
+    if(!tanggal && tgl){
+      tanggal = new Date(tgl).toLocaleDateString("id-ID",{
+        day:"2-digit",
+        month:"long",
+        year:"numeric"
+      });
     }
+
+    const sudah = status === "TERKIRIM";
+
+    /* WA BUTTON DINAMIS */
+    let waButtons = "";
+
+    if(wa1){
+      waButtons += `<a class="wa1" href="https://wa.me/62${wa1.substring(1)}" target="_blank">WA 1</a>`;
+    }
+
+    if(wa2){
+      waButtons += `<a class="wa2" href="https://wa.me/62${wa2.substring(1)}" target="_blank">WA 2</a>`;
+    }
+
+    html += `
+      <div class="card">
+
+        ${isi}
+
+        <div class="aksi">
+
+          ${waButtons}
+
+          <button class="btn ${sudah?'sudah':'kirim'}"
+            onclick="kirimStatus('${isi.replace(/'/g,'')}')"
+            ${sudah?'disabled':''}>
+
+            ${sudah?'SUDAH TERKIRIM':'TERKIRIM'}
+
+          </button>
+
+        </div>
+
+      </div>
+    `;
 
   });
 
-  document.getElementById("jumlah").innerHTML =
-  `
+  document.getElementById("jumlah").innerHTML = `
     <div class="tanggal-besar">📅 ${tanggal}</div>
     <div class="total">Total Pengiriman: ${total}</div>
   `;
@@ -127,9 +179,22 @@ fetch(API_URL + "?t=" + new Date().getTime())
 })
 .catch(err => {
   console.log(err);
-  document.getElementById("list").innerHTML =
-    "❌ Gagal mengambil data";
+  document.getElementById("list").innerHTML = "❌ Gagal load data";
 });
+
+}
+
+/* UPDATE STATUS */
+function kirimStatus(customer){
+
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+customer:customer,
+status:"TERKIRIM"
+})
+})
+.then(() => loadData());
 
 }
 
