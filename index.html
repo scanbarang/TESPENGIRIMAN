@@ -3,315 +3,112 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CEK PENGIRIMAN</title>
+<title>LOGIN PENGIRIMAN</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
 body{
 margin:0;
-padding:10px;
-font-family:'Inter', Arial, sans-serif;
+font-family:Arial;
 background:#f1f5f9;
-color:#111;
 }
 
-/* HEADER */
-.header{
-background:#1565c0;
-color:#fff;
-padding:15px;
-text-align:center;
-border-radius:18px;
-margin-bottom:10px;
-box-shadow:0 3px 10px rgba(0,0,0,.15);
-}
-
-.header img{
-width:70px;
-height:70px;
-border-radius:50%;
-border:3px solid #fff;
-object-fit:cover;
-}
-
-/* STATS */
-.stats{
-display:grid;
-grid-template-columns:1fr 1fr 1fr;
-gap:8px;
-margin-bottom:10px;
+.login{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
 }
 
 .box{
 background:#fff;
-padding:10px;
+padding:20px;
 border-radius:12px;
+box-shadow:0 4px 12px rgba(0,0,0,.1);
+width:280px;
 text-align:center;
-box-shadow:0 2px 6px rgba(0,0,0,.06);
 }
 
-.box .t{font-size:12px;color:#666;}
-.box .v{font-size:16px;font-weight:700;}
-
-.b1{border:1px solid #1e88e5;}
-.b2{border:1px solid #16a34a;}
-.b3{border:1px solid #f59e0b;}
-
-.c1{color:#1565c0;}
-.c2{color:#16a34a;}
-.c3{color:#f59e0b;}
-
-/* CARD */
-.card{
-background:#fff;
-padding:12px;
-margin-bottom:12px;
-border-radius:14px;
-border:2px solid #1e88e5;
-box-shadow:0 4px 10px rgba(0,0,0,.08);
-font-size:12.5px;
-line-height:1.4;
-position:relative;
-overflow:hidden;
-}
-
-.card::before{
-content:"";
-position:absolute;
-top:0;
-left:0;
-width:4px;
-height:100%;
-background:#1e88e5;
-}
-
-.data{
-white-space:pre-line;
-}
-
-/* WA ICON BUTTON */
-.wa-group{
-display:flex;
-gap:10px;
-margin-top:10px;
-justify-content:flex-start;
-}
-
-.wa-box{
-display:flex;
-flex-direction:column;
-align-items:center;
-text-decoration:none;
-width:60px;
-}
-
-.wa-icon{
-width:38px;
-height:38px;
-border-radius:50%;
-background:#25D366;
-display:flex;
-align-items:center;
-justify-content:center;
-color:#fff;
-font-size:18px;
-font-weight:700;
-box-shadow:0 2px 6px rgba(0,0,0,.15);
-}
-
-.wa2 .wa-icon{
-background:#128C7E;
-}
-
-.wa-text{
-font-size:11px;
-margin-top:4px;
-color:#444;
-font-weight:600;
-}
-
-/* BUTTON */
-.aksi{
-margin-top:8px;
-}
-
-.btn{
+input{
 width:100%;
-height:40px;
+padding:10px;
+margin:8px 0;
+border-radius:10px;
+border:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:10px;
+background:#1565c0;
+color:#fff;
 border:none;
 border-radius:10px;
-font-size:13px;
-font-weight:700;
-cursor:pointer;
+font-weight:bold;
 }
 
-.kirim{background:#1565c0;color:#fff;}
-.sudah{background:#16a34a;color:#fff;}
-
+#app{
+display:none;
+padding:10px;
+}
 </style>
-
 </head>
 
 <body>
 
-<div class="header">
-<img src="logo.png">
-<div style="margin-top:8px;font-size:18px;font-weight:700;">
-CEK PENGIRIMAN
-</div>
+<!-- LOGIN -->
+<div class="login" id="loginBox">
+  <div class="box">
+    <h3>LOGIN DRIVER</h3>
+    <input type="text" id="user" placeholder="Username">
+    <input type="password" id="pass" placeholder="Password">
+    <button onclick="login()">MASUK</button>
+  </div>
 </div>
 
-<div id="jumlah">Memuat data...</div>
-<div id="list"></div>
+<!-- APP -->
+<div id="app">
+
+<h3>CEK PENGIRIMAN</h3>
+<div id="konten">Loading...</div>
+
+</div>
 
 <script>
 
-const API_URL="https://script.google.com/macros/s/AKfycbyt7ESUBCLIcNfzCuOZAThCyIesFFlO0nHn4jgzDYoTit6byLEksINbdUc3J0XDa-gZ/exec";
+const API_URL="PASTE_URL_WEB_APP_KAMU";
 
-function ambilCustomer(text){
-const m=text.match(/CUSTOMER\s*:\s*([^\n]+)/i);
-return m ? m[1].trim() : "";
-}
+function login(){
 
-function ambilWa(text){
-const wa=text.match(/08\d{8,13}/g);
-return wa || [];
-}
+const user=document.getElementById("user").value;
+const pass=document.getElementById("pass").value;
 
-function kirimStatus(customer,wa){
-
-if(!customer){
-alert("Customer tidak ditemukan");
-return;
-}
-
-const driver=localStorage.getItem("driver") || "DRIVER";
-
-fetch(API_URL+
-"?customer="+encodeURIComponent(customer)+
-"&driver="+encodeURIComponent(driver)+
-"&wa="+encodeURIComponent(wa)
-)
-.then(r=>r.text())
+fetch(API_URL+"?action=login&user="+user+"&pass="+pass)
+.then(r=>r.json())
 .then(res=>{
 
-if(res==="OK"){
-alert("✅ "+customer+" terkirim");
+if(res.status==="OK"){
+
+localStorage.setItem("driver",res.user);
+
+document.getElementById("loginBox").style.display="none";
+document.getElementById("app").style.display="block";
+
 loadData();
+
 }else{
-alert(res);
+alert("Login gagal!");
 }
 
 })
 .catch(()=>{
-alert("Server Error");
+alert("Server error / URL salah");
 });
 
 }
 
 function loadData(){
-
-fetch(API_URL+"?t="+Date.now())
-.then(r=>r.json())
-.then(data=>{
-
-const orders=data.orders || [];
-const terkirim=data.terkirim || {};
-
-let html="";
-let total=0;
-let ok=0;
-let no=0;
-
-orders.forEach(row=>{
-
-const isi=row[0] || "";
-if(!isi) return;
-
-total++;
-
-const customer=ambilCustomer(isi);
-const key=customer.toLowerCase();
-const wa=ambilWa(isi);
-const sudah=terkirim[key]===true;
-
-if(sudah) ok++; else no++;
-
-html+=`
-<div class="card">
-
-  <div class="data">${isi}</div>
-
-  <div class="wa-group">
-
-    ${wa[0] ? `
-    <a class="wa-box wa1"
-       href="https://wa.me/62${wa[0].substring(1)}"
-       target="_blank">
-       <div class="wa-icon">📱</div>
-       <div class="wa-text">WA 1</div>
-    </a>` : ""}
-
-    ${wa[1] ? `
-    <a class="wa-box wa2"
-       href="https://wa.me/62${wa[1].substring(1)}"
-       target="_blank">
-       <div class="wa-icon">📱</div>
-       <div class="wa-text">WA 2</div>
-    </a>` : ""}
-
-  </div>
-
-  <div class="aksi">
-    <button
-      class="btn ${sudah ? 'sudah' : 'kirim'}"
-      ${sudah ? 'disabled' : ''}
-      onclick="kirimStatus(\`${customer}\`,\`${wa[0] || ""}\`)">
-
-      ${sudah ? '✓ TERKIRIM' : '🚚 KIRIM'}
-
-    </button>
-  </div>
-
-</div>
-`;
-});
-
-document.getElementById("jumlah").innerHTML=`
-<div class="stats">
-
-  <div class="box b1">
-    <div class="t">TOTAL</div>
-    <div class="v c1">${total}</div>
-  </div>
-
-  <div class="box b2">
-    <div class="t">TERKIRIM</div>
-    <div class="v c2">${ok}</div>
-  </div>
-
-  <div class="box b3">
-    <div class="t">BELUM</div>
-    <div class="v c3">${no}</div>
-  </div>
-
-</div>
-`;
-
-document.getElementById("list").innerHTML=html;
-
-})
-.catch(()=>{
-
-document.getElementById("jumlah").innerHTML="❌ Gagal mengambil data";
-
-});
-
+document.getElementById("konten").innerHTML="LOGIN BERHASIL ✔ SISTEM SIAP";
 }
-
-loadData();
-setInterval(loadData,5000);
 
 </script>
 
