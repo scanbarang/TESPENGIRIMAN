@@ -13,7 +13,7 @@ margin:0;
 padding:10px;
 font-family:'Inter', Arial, sans-serif;
 background:#f1f5f9;
-color:#1f2937;
+color:#111;
 }
 
 /* HEADER */
@@ -28,8 +28,8 @@ box-shadow:0 3px 10px rgba(0,0,0,.15);
 }
 
 .header img{
-width:75px;
-height:75px;
+width:70px;
+height:70px;
 border-radius:50%;
 border:3px solid #fff;
 object-fit:cover;
@@ -60,14 +60,15 @@ border-radius:14px;
 box-shadow:0 2px 8px rgba(0,0,0,.08);
 border-left:4px solid #1565c0;
 font-size:12.5px;
+line-height:1.4;
 }
 
-/* DATA TEXT */
+/* ORDER TEXT VERTICAL RAPI */
 .data{
 display:flex;
 flex-direction:column;
 gap:3px;
-line-height:1.4;
+white-space:pre-line;
 }
 
 /* WA BUTTON */
@@ -84,7 +85,6 @@ border-radius:10px;
 display:flex;
 align-items:center;
 justify-content:center;
-gap:5px;
 font-size:12px;
 font-weight:700;
 color:#fff;
@@ -94,7 +94,7 @@ text-decoration:none;
 .wa1{background:#25D366;}
 .wa2{background:#128C7E;}
 
-/* ACTION */
+/* BUTTON */
 .aksi{
 margin-top:8px;
 }
@@ -207,7 +207,7 @@ html+=`
 <div class="card">
 
   <div class="data">
-    <div>${isi}</div>
+    ${isi}
   </div>
 
   <div class="wa-group">
