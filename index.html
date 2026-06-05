@@ -244,24 +244,39 @@ WA 2
 html+=`
 <div class="card">
 
-<div style="margin-bottom:10px;">
-${isi}
-</div>
+  <div class="data">
+    <div><b>Customer:</b> ${customer}</div>
+    <div><b>Data:</b> ${isi}</div>
+  </div>
 
-<div class="aksi">
+  <div class="wa-group">
 
-${tombolWa}
+    ${wa[0] ? `
+    <a class="wa-btn wa1"
+       href="https://wa.me/62${wa[0].substring(1)}"
+       target="_blank">
+       📱 WA 1
+    </a>` : ""}
 
-<button
-class="btn ${sudah ? 'sudah' : 'kirim'}"
-${sudah ? 'disabled' : ''}
-onclick="kirimStatus(\`${customer}\`,\`${wa[0] || ""}\`)">
+    ${wa[1] ? `
+    <a class="wa-btn wa2"
+       href="https://wa.me/62${wa[1].substring(1)}"
+       target="_blank">
+       📱 WA 2
+    </a>` : ""}
 
-${sudah ? '✅ TERKIRIM' : '🚚 KIRIM'}
+  </div>
 
-</button>
+  <div class="aksi">
+    <button
+      class="btn ${sudah ? 'sudah' : 'kirim'}"
+      ${sudah ? 'disabled' : ''}
+      onclick="kirimStatus(\`${customer}\`,\`${wa[0] || ""}\`)">
 
-</div>
+      ${sudah ? '✅ TERKIRIM' : '🚚 KIRIM'}
+
+    </button>
+  </div>
 
 </div>
 `;
