@@ -66,7 +66,7 @@ display:none;
 padding:10px;
 }
 
-/* HEADER */
+/* HEADER + GLOW EFFECT */
 .header{
 background:#1565c0;
 color:#fff;
@@ -74,6 +74,23 @@ padding:15px;
 border-radius:14px;
 text-align:center;
 margin-bottom:10px;
+
+/* 🔥 GLOW EFFECT */
+box-shadow:
+0 0 10px rgba(21,101,192,0.6),
+0 0 25px rgba(21,101,192,0.4),
+0 4px 12px rgba(0,0,0,.15);
+
+animation: glow 2s infinite alternate;
+}
+
+@keyframes glow{
+from{
+box-shadow:0 0 8px rgba(21,101,192,0.4);
+}
+to{
+box-shadow:0 0 18px rgba(21,101,192,0.9);
+}
 }
 
 /* STATS */
@@ -126,7 +143,7 @@ height:100%;
 background:#1e88e5;
 }
 
-/* WA */
+/* WA BUTTON */
 .wa-group{
 display:flex;
 gap:10px;
@@ -141,6 +158,7 @@ text-decoration:none;
 width:60px;
 }
 
+/* 🔥 WHATSAPP ICON ASLI (SVG) */
 .wa-icon{
 width:38px;
 height:38px;
@@ -149,9 +167,7 @@ background:#25D366;
 display:flex;
 align-items:center;
 justify-content:center;
-color:#fff;
-font-size:16px;
-font-weight:700;
+box-shadow:0 2px 6px rgba(0,0,0,.15);
 }
 
 .wa2 .wa-icon{background:#128C7E;}
@@ -192,7 +208,7 @@ cursor:pointer;
 
     <img src="logo.png">
 
-    <h3 style="margin:0;color:#1565c0;">UFO KEBONSARI MALANG</h3>
+    <h3 style="margin:0;color:#1565c0;">TOKO OITA</h3>
     <p style="font-size:12px;color:#666;">Sistem Pengiriman Driver</p>
 
     <input type="text" id="user" placeholder="Username">
@@ -218,7 +234,7 @@ CEK PENGIRIMAN
 
 <script>
 
-const API_URL="https://script.google.com/macros/s/AKfycbzjNnwv0gSi1a7OQVhkzJ-xDgJ-WRPhlNvu9WSyR-DhXOTz_DPGCOHu53eN9cOjqLna/exec";
+const API_URL="PASTE_URL_WEB_APP_KAMU";
 
 function login(){
 
@@ -249,6 +265,15 @@ alert("Server error");
 
 }
 
+/* WA ICON SVG */
+function waIcon(){
+return `
+<svg viewBox="0 0 32 32" width="20" height="20" fill="white">
+<path d="M19.11 17.205c-.297-.149-1.758-.867-2.03-.967-.273-.099-.472-.148-.67.15-.198.297-.768.967-.94 1.165-.173.198-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.099-.198.05-.372-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.58-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.693.626.711.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+<path d="M16 3C9.373 3 4 8.373 4 15c0 2.387.703 4.62 1.918 6.496L4 29l7.785-1.88C13.55 28.42 14.74 28.7 16 28.7c6.627 0 12-5.373 12-12S22.627 3 16 3zm0 22.7c-1.16 0-2.29-.19-3.36-.56l-.24-.08-4.62 1.12 1.23-4.5-.16-.24C7.9 20.23 7.3 17.7 7.3 15 7.3 9.57 11.57 5.3 17 5.3S26.7 9.57 26.7 15 22.43 25.7 17 25.7z"/>
+</svg>`;
+}
+
 function ambilCustomer(text){
 const m=text.match(/CUSTOMER\s*:\s*([^\n]+)/i);
 return m ? m[1].trim() : "";
@@ -263,15 +288,9 @@ function kirimStatus(customer,wa){
 
 const driver=localStorage.getItem("driver") || "-";
 
-fetch(API_URL+
-"?customer="+encodeURIComponent(customer)+
-"&driver="+encodeURIComponent(driver)+
-"&wa="+encodeURIComponent(wa)
-)
-.then(r=>r.text())
-.then(()=>{
-loadData();
-});
+fetch(API_URL+"?customer="+encodeURIComponent(customer)+"&driver="+encodeURIComponent(driver)+"&wa="+wa)
+.then(()=>loadData());
+
 }
 
 function loadData(){
@@ -284,9 +303,7 @@ const orders=data.orders || [];
 const terkirim=data.terkirim || {};
 
 let html="";
-let total=0;
-let ok=0;
-let no=0;
+let total=0,ok=0,no=0;
 
 orders.forEach(row=>{
 
@@ -311,13 +328,13 @@ html+=`
 
 ${wa[0] ? `
 <a class="wa-box wa1" href="https://wa.me/62${wa[0].substring(1)}" target="_blank">
-<div class="wa-icon">WA</div>
+<div class="wa-icon">${waIcon()}</div>
 <div class="wa-text">WA 1</div>
 </a>` : ""}
 
 ${wa[1] ? `
 <a class="wa-box wa2" href="https://wa.me/62${wa[1].substring(1)}" target="_blank">
-<div class="wa-icon">WA</div>
+<div class="wa-icon">${waIcon()}</div>
 <div class="wa-text">WA 2</div>
 </a>` : ""}
 
@@ -337,20 +354,9 @@ ${sudah?'✓ TERKIRIM':'🚚 KIRIM'}
 document.getElementById("stats").innerHTML=`
 <div class="stats">
 
-<div class="boxstat t1">
-<div class="t">TOTAL</div>
-<div class="v c1">${total}</div>
-</div>
-
-<div class="boxstat t2">
-<div class="t">TERKIRIM</div>
-<div class="v c2">${ok}</div>
-</div>
-
-<div class="boxstat t3">
-<div class="t">BELUM</div>
-<div class="v c3">${no}</div>
-</div>
+<div class="boxstat t1"><div class="t">TOTAL</div><div class="v c1">${total}</div></div>
+<div class="boxstat t2"><div class="t">TERKIRIM</div><div class="v c2">${ok}</div></div>
+<div class="boxstat t3"><div class="t">BELUM</div><div class="v c3">${no}</div></div>
 
 </div>
 `;
