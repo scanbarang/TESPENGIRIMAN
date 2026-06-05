@@ -3,105 +3,206 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pengiriman</title>
+
+<title>CEK PENGIRIMAN</title>
 
 <style>
-body{margin:0;padding:10px;font-family:Arial;background:#f5f7fa}
+
+body{
+margin:0;
+padding:8px;
+font-family:Arial;
+background:#f5f7fa;
+}
 
 .header{
-  background:#1565c0;
-  color:white;
-  padding:12px;
-  text-align:center;
-  border-radius:10px;
-  font-size:18px;
-  font-weight:bold;
+background:#1565c0;
+color:#fff;
+padding:10px;
+text-align:center;
+border-radius:12px;
+margin-bottom:10px;
+}
+
+.header img{
+width:80px;
+height:80px;
+border-radius:50%;
+border:3px solid white;
+object-fit:cover;
+}
+
+#jumlah{
+text-align:center;
+margin:10px 0;
+}
+
+.tanggal{
+font-size:22px;
+font-weight:bold;
+color:#1565c0;
+}
+
+.total{
+font-size:18px;
+font-weight:bold;
+margin-top:5px;
 }
 
 .card{
-  background:white;
-  padding:10px;
-  margin-top:8px;
-  border-radius:10px;
-  white-space:pre-wrap;
+background:white;
+padding:10px;
+margin-bottom:8px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.15);
+font-size:14px;
+white-space:pre-wrap;
+line-height:1.5;
 }
 
 .aksi{
-  display:flex;
-  gap:5px;
-  margin-top:8px;
+display:flex;
+gap:5px;
+margin-top:8px;
 }
 
-a,button{
-  flex:1;
-  padding:6px;
-  border:none;
-  border-radius:6px;
-  font-size:12px;
-  text-align:center;
+.btn{
+flex:1;
+padding:8px;
+border:none;
+border-radius:8px;
+font-size:12px;
+font-weight:bold;
+cursor:pointer;
+text-decoration:none;
+text-align:center;
 }
 
-.wa{
-  background:#25D366;
-  color:white;
-  text-decoration:none;
+.wa1{
+background:#25D366;
+color:white;
+}
+
+.wa2{
+background:#128C7E;
+color:white;
 }
 
 .kirim{
-  background:#1565c0;
-  color:white;
+background:#1565c0;
+color:white;
 }
+
+.sudah{
+background:#16a34a;
+color:white;
+}
+
 </style>
 </head>
 
 <body>
 
 <div class="header">
-CEK PENGIRIMAN - PDF BESOK
+<img src="logo.png">
+<div style="margin-top:8px;font-size:22px;font-weight:bold;">
+CEK PENGIRIMAN
+</div>
 </div>
 
-<div id="list">Loading...</div>
+<div id="jumlah">Memuat data...</div>
+<div id="list"></div>
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbxuDE6FlKICIcXm24k8UPP8GW7MPlPAOrqkGyyZCO11CKGj_tYbhKx7CSyrXqXFGpAA/exec";
+const API_URL =
+"https://script.google.com/macros/s/AKfycbxuDE6FlKICIcXm24k8UPP8GW7MPlPAOrqkGyyZCO11CKGj_tYbhKx7CSyrXqXFGpAA/exec";
 
-function getVal(text,key){
-  const r = new RegExp(key + ": (.*)");
-  const m = text.match(r);
-  return m ? m[1].trim() : "";
+function ambilCustomer(text){
+
+let m = text.match(/CUSTOMER:\s*(.*)/i);
+
+return m ? m[1].trim() : "";
+
+}
+
+function ambilWa(text){
+
+let wa = text.match(/08\d{8,13}/g);
+
+return wa || [];
+
 }
 
 function loadData(){
 
-fetch(API_URL)
+fetch(API_URL + "?t=" + Date.now())
 .then(r=>r.json())
 .then(data=>{
 
 let html="";
+let total=0;
 
-data.forEach(row=>{
+const orders = data.orders;
+const terkirim = data.terkirim;
 
-const text = row[0];
-if(!text) return;
+orders.forEach(row=>{
 
-const customer = getVal(text,"CUSTOMER");
-const wa1 = getVal(text,"WA1");
-const wa2 = getVal(text,"WA2");
+const isi = row[0];
+
+if(!isi) return;
+
+total++;
+
+const customer = ambilCustomer(isi);
+const key = customer.toLowerCase();
+
+const wa = ambilWa(isi);
+
+const sudah = terkirim[key];
+
+let tombolWa="";
+
+if(wa[0]){
+
+tombolWa += `
+<a class="btn wa1"
+href="https://wa.me/62${wa[0].substring(1)}"
+target="_blank">
+WA 1
+</a>
+`;
+
+}
+
+if(wa[1]){
+
+tombolWa += `
+<a class="btn wa2"
+href="https://wa.me/62${wa[1].substring(1)}"
+target="_blank">
+WA 2
+</a>
+`;
+
+}
 
 html += `
 <div class="card">
 
-${text}
+${isi}
 
 <div class="aksi">
 
-${wa1 ? `<a class="wa" href="https://wa.me/62${wa1.substring(1)}" target="_blank">WA 1</a>` : ""}
+${tombolWa}
 
-${wa2 ? `<a class="wa" href="https://wa.me/62${wa2.substring(1)}" target="_blank">WA 2</a>` : ""}
+<button
+class="btn ${sudah?'sudah':'kirim'}"
+${sudah?'disabled':''}
+onclick="kirimStatus('${customer}','${wa[0]||''}')">
 
-<button class="kirim" onclick="kirim('${customer}')">
-TERKIRIM
+${sudah?'✓ TERKIRIM':'KIRIM'}
+
 </button>
 
 </div>
@@ -111,31 +212,40 @@ TERKIRIM
 
 });
 
+document.getElementById("jumlah").innerHTML = `
+<div class="tanggal">📦 Pengiriman Hari Ini</div>
+<div class="total">Total Pengiriman : ${total}</div>
+`;
+
 document.getElementById("list").innerHTML = html;
 
 });
 
 }
 
-function kirim(customer){
+function kirimStatus(customer,wa){
 
-const driver = "DRIVER";
+const driver = localStorage.getItem("driver") || "DRIVER";
 
-fetch(API_URL,{
-method:"POST",
-body:new URLSearchParams({
-customer: customer,
-driver: driver
-})
-})
+fetch(
+API_URL+
+"?customer="+encodeURIComponent(customer)+
+ "&driver="+encodeURIComponent(driver)+
+ "&wa="+encodeURIComponent(wa)
+)
 .then(r=>r.text())
 .then(res=>{
 
 if(res=="OK"){
-  alert("TERKIRIM: " + customer);
-  loadData();
+
+alert(customer+" terkirim");
+
+loadData();
+
 }else{
-  alert("NOT FOUND: " + customer);
+
+alert(res);
+
 }
 
 });
@@ -143,6 +253,9 @@ if(res=="OK"){
 }
 
 loadData();
+
+/* realtime 5 detik */
+setInterval(loadData,5000);
 
 </script>
 
