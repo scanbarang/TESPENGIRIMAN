@@ -66,23 +66,34 @@ display:none;
 padding:10px;
 }
 
-/* HEADER */
+/* HEADER (BESAR + UNGU + GLOW) */
 .header{
 background:#ffffff;
-padding:14px;
+padding:18px;
 border-radius:14px;
 text-align:center;
 margin-bottom:10px;
 box-shadow:0 2px 8px rgba(0,0,0,.06);
 border:1px solid #eee;
+
+/* glow halus */
+animation: glow 2s infinite alternate;
 }
 
-/* 🔥 CEK PENGIRIMAN COLOR (UNGU) */
+@keyframes glow{
+from{
+box-shadow:0 0 8px rgba(109,40,217,0.25);
+}
+to{
+box-shadow:0 0 18px rgba(109,40,217,0.55);
+}
+}
+
 .header-title{
-font-size:16px;
-font-weight:800;
+font-size:22px; /* 🔥 LEBIH BESAR */
+font-weight:900;
 color:#6d28d9;
-letter-spacing:1px;
+letter-spacing:2px;
 }
 
 /* STATS */
@@ -93,19 +104,32 @@ gap:8px;
 margin-bottom:10px;
 }
 
+/* 🔥 BORDER NYALA KEMBALI */
 .boxstat{
 background:#fff;
 padding:10px;
 border-radius:12px;
 text-align:center;
 box-shadow:0 2px 6px rgba(0,0,0,.05);
-border:1px solid #eee;
+
+/* BORDER NYALA */
+border:2px solid #6d28d9;
+position:relative;
 }
 
-.boxstat .v{font-weight:700;font-size:15px;}
+.boxstat::after{
+content:"";
+position:absolute;
+inset:0;
+border-radius:12px;
+box-shadow:0 0 10px rgba(109,40,217,0.25);
+pointer-events:none;
+}
+
+.boxstat .v{font-weight:800;font-size:16px;}
 .boxstat .t{font-size:11px;color:#666;}
 
-.c1{color:#333;}
+.c1{color:#111;}
 .c2{color:#16a34a;}
 .c3{color:#f59e0b;}
 
@@ -189,16 +213,8 @@ font-weight:700;
 cursor:pointer;
 }
 
-/* KIRIM tetap hijau */
-.kirim{
-background:#16a34a;
-color:#fff;
-}
-
-.sudah{
-background:#444;
-color:#fff;
-}
+.kirim{background:#16a34a;color:#fff;}
+.sudah{background:#444;color:#fff;}
 
 </style>
 </head>
@@ -278,20 +294,7 @@ const wa=text.match(/08\d{8,13}/g);
 return wa || [];
 }
 
-/* KIRIM */
-function kirimStatus(customer,wa){
-
-const driver=localStorage.getItem("driver") || "-";
-
-fetch(API_URL+
-"?customer="+encodeURIComponent(customer)+
-"&driver="+encodeURIComponent(driver)+
-"&wa="+wa
-)
-.then(()=>loadData());
-}
-
-/* LOAD DATA */
+/* LOAD */
 function loadData(){
 
 fetch(API_URL)
