@@ -246,14 +246,16 @@ ${isi}
 
 <div class="aksi">
 
+<div class="wa-row">
 ${tombolWa}
+</div>
 
 <button
 class="btn ${sudah ? 'sudah' : 'kirim'}"
 ${sudah ? 'disabled' : ''}
 onclick="kirimStatus(\`${customer}\`,\`${wa[0] || ""}\`)">
 
-${sudah ? '✓ TERKIRIM' : 'KIRIM'}
+${sudah ? '✅ TERKIRIM' : '🚚 KIRIM'}
 
 </button>
 
