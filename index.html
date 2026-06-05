@@ -118,12 +118,43 @@ CEK PENGIRIMAN
 const API_URL =
 "https://script.google.com/macros/s/AKfycbyt7ESUBCLIcNfzCuOZAThCyIesFFlO0nHn4jgzDYoTit6byLEksINbdUc3J0XDa-gZ/exec";
 
-function ambilCustomer(text){
+function kirimStatus(customer,wa){
 
-let m = text.match(/CUSTOMER:\s*(.*)/i);
+if(!customer){
+alert("Nama customer tidak ditemukan");
+return;
+}
 
-return m ? m[1].trim() : "";
+const driver = localStorage.getItem("driver") || "DRIVER";
 
+fetch(
+API_URL +
+"?customer=" + encodeURIComponent(customer) +
+"&driver=" + encodeURIComponent(driver) +
+"&wa=" + encodeURIComponent(wa)
+)
+.then(r=>r.text())
+.then(res=>{
+
+if(res=="OK"){
+
+alert("✅ " + customer + " terkirim");
+
+loadData();
+
+}else{
+
+alert("❌ " + res);
+
+}
+
+})
+.catch(err=>{
+alert("Server Error");
+console.log(err);
+});
+
+}
 }
 
 function ambilWa(text){
