@@ -3,57 +3,74 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>CEK PENGIRIMAN</title>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-<style>
 body{
 margin:0;
 padding:10px;
-font-family:Arial,sans-serif;
+font-family:'Inter', Arial, sans-serif;
 background:#f1f5f9;
+color:#1f2937;
 }
 
+/* HEADER */
 .header{
 background:#1565c0;
 color:#fff;
 padding:15px;
 text-align:center;
 border-radius:18px;
-margin-bottom:12px;
+margin-bottom:10px;
 box-shadow:0 3px 10px rgba(0,0,0,.15);
 }
 
 .header img{
-width:85px;
-height:85px;
+width:75px;
+height:75px;
 border-radius:50%;
-border:4px solid #fff;
+border:3px solid #fff;
 object-fit:cover;
 }
 
-/* CARD LEBIH COMPACT & VERTICAL */
+/* TOTAL */
+#jumlah{
+text-align:center;
+margin-bottom:10px;
+}
+
+.total{
+font-size:16px;
+font-weight:700;
+color:#1565c0;
+background:#fff;
+padding:10px;
+border-radius:12px;
+box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+
+/* CARD */
 .card{
 background:#fff;
 padding:12px;
 margin-bottom:10px;
-border-radius:16px;
-box-shadow:0 3px 10px rgba(0,0,0,.08);
+border-radius:14px;
+box-shadow:0 2px 8px rgba(0,0,0,.08);
 border-left:4px solid #1565c0;
-font-size:13px;
+font-size:12.5px;
 }
 
-/* TEXT DALAM CARD JADI RAPI */
+/* DATA TEXT */
 .data{
 display:flex;
 flex-direction:column;
-gap:4px;
+gap:3px;
 line-height:1.4;
 }
 
-/* WA BUTTON STYLE BARU (ICON STYLE) */
+/* WA BUTTON */
 .wa-group{
 display:flex;
 gap:6px;
@@ -62,35 +79,29 @@ margin-top:10px;
 
 .wa-btn{
 flex:1;
-height:38px;
+height:36px;
 border-radius:10px;
 display:flex;
 align-items:center;
 justify-content:center;
-gap:6px;
+gap:5px;
 font-size:12px;
 font-weight:700;
-color:white;
+color:#fff;
 text-decoration:none;
 }
 
-.wa1{
-background:#25D366;
-}
+.wa1{background:#25D366;}
+.wa2{background:#128C7E;}
 
-.wa2{
-background:#128C7E;
-}
-
-/* ACTION BUTTON */
+/* ACTION */
 .aksi{
 margin-top:8px;
-display:flex;
 }
 
 .btn{
 width:100%;
-height:42px;
+height:40px;
 border:none;
 border-radius:10px;
 font-size:13px;
@@ -100,27 +111,22 @@ cursor:pointer;
 
 .kirim{
 background:#1565c0;
-color:white;
+color:#fff;
 }
 
 .sudah{
 background:#16a34a;
-color:white;
+color:#fff;
 }
+</style>
 
-/* ICON kecil WA */
-.icon{
-font-size:14px;
-}
-</style>
-</style>
 </head>
 
 <body>
 
 <div class="header">
 <img src="logo.png">
-<div style="margin-top:8px;font-size:22px;font-weight:bold;">
+<div style="margin-top:8px;font-size:18px;font-weight:700;">
 CEK PENGIRIMAN
 </div>
 </div>
@@ -133,19 +139,13 @@ CEK PENGIRIMAN
 const API_URL="https://script.google.com/macros/s/AKfycbyt7ESUBCLIcNfzCuOZAThCyIesFFlO0nHn4jgzDYoTit6byLEksINbdUc3J0XDa-gZ/exec";
 
 function ambilCustomer(text){
-
 const m=text.match(/CUSTOMER\s*:\s*([^\n]+)/i);
-
 return m ? m[1].trim() : "";
-
 }
 
 function ambilWa(text){
-
 const wa=text.match(/08\d{8,13}/g);
-
 return wa || [];
-
 }
 
 function kirimStatus(customer,wa){
@@ -157,8 +157,7 @@ return;
 
 const driver=localStorage.getItem("driver") || "DRIVER";
 
-fetch(
-API_URL+
+fetch(API_URL+
 "?customer="+encodeURIComponent(customer)+
 "&driver="+encodeURIComponent(driver)+
 "&wa="+encodeURIComponent(wa)
@@ -167,24 +166,15 @@ API_URL+
 .then(res=>{
 
 if(res==="OK"){
-
 alert("✅ "+customer+" terkirim");
-
 loadData();
-
 }else{
-
 alert(res);
-
 }
 
 })
-.catch(err=>{
-
-console.log(err);
-
+.catch(()=>{
 alert("Server Error");
-
 });
 
 }
@@ -204,49 +194,20 @@ let total=0;
 orders.forEach(row=>{
 
 const isi=row[0] || "";
-
 if(!isi) return;
 
 total++;
 
 const customer=ambilCustomer(isi);
 const key=customer.toLowerCase();
-
 const wa=ambilWa(isi);
-
 const sudah=terkirim[key]===true;
 
-let tombolWa="";
-
-if(wa[0]){
-
-tombolWa+=`
-<a class="btn wa1"
-href="https://wa.me/62${wa[0].substring(1)}"
-target="_blank">
-WA 1
-</a>
-`;
-
-}
-
-if(wa[1]){
-
-tombolWa+=`
-<a class="btn wa2"
-href="https://wa.me/62${wa[1].substring(1)}"
-target="_blank">
-WA 2
-</a>
-`;
-
-}
 html+=`
 <div class="card">
 
   <div class="data">
-    <div><b>Customer:</b> ${customer}</div>
-    <div><b>Data:</b> ${isi}</div>
+    <div>${isi}</div>
   </div>
 
   <div class="wa-group">
@@ -283,26 +244,21 @@ html+=`
 });
 
 document.getElementById("jumlah").innerHTML=`
-<div class="tanggal">📦 Pengiriman Hari Ini</div>
-<div class="total">Total Pengiriman : ${total}</div>
+<div class="total">📊 Total Pengiriman Hari Ini: ${total}</div>
 `;
 
 document.getElementById("list").innerHTML=html;
 
 })
-.catch(err=>{
+.catch(()=>{
 
-console.log(err);
-
-document.getElementById("jumlah").innerHTML=
-"❌ Gagal mengambil data";
+document.getElementById("jumlah").innerHTML="❌ Gagal mengambil data";
 
 });
 
 }
 
 loadData();
-
 setInterval(loadData,5000);
 
 </script>
