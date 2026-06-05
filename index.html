@@ -1,294 +1,56 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+const SHEET_WEB = "PDF BESOK";
+const SHEET_STATUS = "STATUS PENGIRIMAN";
 
-<title>CEK PENGIRIMAN</title>
+/* =========================
+   LOAD DATA WEB
+========================= */
+function doGet(e) {
 
-<style>
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-body{
-margin:0;
-padding:8px;
-font-family:Arial;
-background:#f5f7fa;
-}
+  // klik tombol kirim
+  if (e.parameter.customer) {
 
-.header{
-background:#1565c0;
-color:#fff;
-padding:10px;
-text-align:center;
-border-radius:12px;
-margin-bottom:10px;
-}
+    const customer = (e.parameter.customer || "").trim();
+    const driver = (e.parameter.driver || "-").trim();
+    const wa = (e.parameter.wa || "").trim();
 
-.header img{
-width:80px;
-height:80px;
-border-radius:50%;
-border:3px solid white;
-object-fit:cover;
-}
+    const statusSheet = ss.getSheetByName(SHEET_STATUS);
 
-#jumlah{
-text-align:center;
-margin:10px 0;
-}
+    statusSheet.appendRow([
+      new Date(),
+      customer,
+      "TERKIRIM",
+      driver,
+      wa
+    ]);
 
-.tanggal{
-font-size:22px;
-font-weight:bold;
-color:#1565c0;
-}
+    return ContentService.createTextOutput("OK");
+  }
 
-.total{
-font-size:18px;
-font-weight:bold;
-margin-top:5px;
-}
+  const pdfSheet = ss.getSheetByName(SHEET_WEB);
+  const pdfData = pdfSheet.getDataRange().getValues();
 
-.card{
-background:white;
-padding:10px;
-margin-bottom:8px;
-border-radius:10px;
-box-shadow:0 2px 6px rgba(0,0,0,.15);
-font-size:14px;
-white-space:pre-wrap;
-line-height:1.5;
-}
+  const statusSheet = ss.getSheetByName(SHEET_STATUS);
+  const statusData = statusSheet.getDataRange().getValues();
 
-.aksi{
-display:flex;
-gap:5px;
-margin-top:8px;
-}
+  let terkirim = {};
 
-.btn{
-flex:1;
-padding:8px;
-border:none;
-border-radius:8px;
-font-size:12px;
-font-weight:bold;
-cursor:pointer;
-text-decoration:none;
-text-align:center;
-}
+  for(let i=1;i<statusData.length;i++){
 
-.wa1{
-background:#25D366;
-color:white;
-}
+    let nama = (statusData[i][1] || "").toString().trim().toLowerCase();
 
-.wa2{
-background:#128C7E;
-color:white;
-}
+    if(nama){
+      terkirim[nama] = true;
+    }
 
-.kirim{
-background:#1565c0;
-color:white;
-}
+  }
 
-.sudah{
-background:#16a34a;
-color:white;
-}
-
-</style>
-</head>
-
-<body>
-
-<div class="header">
-<img src="logo.png">
-<div style="margin-top:8px;font-size:22px;font-weight:bold;">
-CEK PENGIRIMAN
-</div>
-</div>
-
-<div id="jumlah">Memuat data...</div>
-<div id="list"></div>
-
-<script>
-
-const API_URL =
-"https://script.google.com/macros/s/AKfycbyt7ESUBCLIcNfzCuOZAThCyIesFFlO0nHn4jgzDYoTit6byLEksINbdUc3J0XDa-gZ/exec";
-
-function kirimStatus(customer,wa){
-
-if(!customer){
-alert("Nama customer tidak ditemukan");
-return;
-}
-
-const driver = localStorage.getItem("driver") || "DRIVER";
-
-fetch(
-API_URL +
-"?customer=" + encodeURIComponent(customer) +
-"&driver=" + encodeURIComponent(driver) +
-"&wa=" + encodeURIComponent(wa)
-)
-.then(r=>r.text())
-.then(res=>{
-
-if(res=="OK"){
-
-alert("✅ " + customer + " terkirim");
-
-loadData();
-
-}else{
-
-alert("❌ " + res);
+  return ContentService
+  .createTextOutput(JSON.stringify({
+    orders: pdfData,
+    terkirim: terkirim
+  }))
+  .setMimeType(ContentService.MimeType.JSON);
 
 }
-
-})
-.catch(err=>{
-alert("Server Error");
-console.log(err);
-});
-
-}
-}
-
-function ambilWa(text){
-
-let wa = text.match(/08\d{8,13}/g);
-
-return wa || [];
-
-}
-
-function loadData(){
-
-fetch(API_URL + "?t=" + Date.now())
-.then(r=>r.json())
-.then(data=>{
-
-let html="";
-let total=0;
-
-const orders = data.orders;
-const terkirim = data.terkirim;
-
-orders.forEach(row=>{
-
-const isi = row[0];
-
-if(!isi) return;
-
-total++;
-
-const customer = ambilCustomer(isi);
-const key = customer.toLowerCase();
-
-const wa = ambilWa(isi);
-
-const sudah = terkirim[key];
-
-let tombolWa="";
-
-if(wa[0]){
-
-tombolWa += `
-<a class="btn wa1"
-href="https://wa.me/62${wa[0].substring(1)}"
-target="_blank">
-WA 1
-</a>
-`;
-
-}
-
-if(wa[1]){
-
-tombolWa += `
-<a class="btn wa2"
-href="https://wa.me/62${wa[1].substring(1)}"
-target="_blank">
-WA 2
-</a>
-`;
-
-}
-
-html += `
-<div class="card">
-
-${isi}
-
-<div class="aksi">
-
-${tombolWa}
-
-<button
-class="btn ${sudah?'sudah':'kirim'}"
-${sudah?'disabled':''}
-onclick="kirimStatus('${customer}','${wa[0]||''}')">
-
-${sudah?'✓ TERKIRIM':'KIRIM'}
-
-</button>
-
-</div>
-
-</div>
-`;
-
-});
-
-document.getElementById("jumlah").innerHTML = `
-<div class="tanggal">📦 Pengiriman Hari Ini</div>
-<div class="total">Total Pengiriman : ${total}</div>
-`;
-
-document.getElementById("list").innerHTML = html;
-
-});
-
-}
-
-function kirimStatus(customer,wa){
-
-const driver = localStorage.getItem("driver") || "DRIVER";
-
-fetch(
-API_URL+
-"?customer="+encodeURIComponent(customer)+
- "&driver="+encodeURIComponent(driver)+
- "&wa="+encodeURIComponent(wa)
-)
-.then(r=>r.text())
-.then(res=>{
-
-if(res=="OK"){
-
-alert(customer+" terkirim");
-
-loadData();
-
-}else{
-
-alert(res);
-
-}
-
-});
-
-}
-
-loadData();
-
-/* realtime 5 detik */
-setInterval(loadData,5000);
-
-</script>
-
-</body>
-</html>
