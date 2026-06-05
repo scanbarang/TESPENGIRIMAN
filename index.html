@@ -1,3 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>CEK PENGIRIMAN</title>
+
+<style>
+
+body{
+margin:0;
+padding:8px;
+font-family:Arial;
+background:#f5f7fa;
+}
+
+.header{
+background:#1565c0;
+color:#fff;
+padding:10px;
+text-align:center;
+border-radius:12px;
+margin-bottom:10px;
+}
+
+.header img{
+width:80px;
+height:80px;
+border-radius:50%;
+border:3px solid white;
+object-fit:cover;
+}
+
+#jumlah{
+text-align:center;
+margin:10px 0;
+}
+
+.tanggal{
+font-size:22px;
+font-weight:bold;
+color:#1565c0;
+}
+
+.total{
+font-size:18px;
+font-weight:bold;
+margin-top:5px;
+}
+
+.card{
+background:white;
+padding:10px;
+margin-bottom:8px;
+border-radius:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.15);
+font-size:14px;
+white-space:pre-wrap;
+line-height:1.5;
+}
+
+.aksi{
+display:flex;
+gap:5px;
+margin-top:8px;
+}
+
+.btn{
+flex:1;
+padding:8px;
+border:none;
+border-radius:8px;
+font-size:12px;
+font-weight:bold;
+cursor:pointer;
+text-decoration:none;
+text-align:center;
+}
+
+.wa1{
+background:#25D366;
+color:white;
+}
+
+.wa2{
+background:#128C7E;
+color:white;
+}
+
+.kirim{
+background:#1565c0;
+color:white;
+}
+
+.sudah{
+background:#16a34a;
+color:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<img src="logo.png">
+<div style="margin-top:8px;font-size:22px;font-weight:bold;">
+CEK PENGIRIMAN
+</div>
+</div>
+
+<div id="jumlah">Memuat data...</div>
+<div id="list"></div>
+
 <script>
 
 const API_URL="https://script.google.com/macros/s/AKfycbyt7ESUBCLIcNfzCuOZAThCyIesFFlO0nHn4jgzDYoTit6byLEksINbdUc3J0XDa-gZ/exec";
@@ -50,8 +165,11 @@ alert(res);
 
 })
 .catch(err=>{
+
 console.log(err);
+
 alert("Server Error");
+
 });
 
 }
@@ -62,11 +180,11 @@ fetch(API_URL+"?t="+Date.now())
 .then(r=>r.json())
 .then(data=>{
 
-let html="";
-let total=0;
-
 const orders=data.orders || [];
 const terkirim=data.terkirim || {};
+
+let html="";
+let total=0;
 
 orders.forEach(row=>{
 
@@ -90,7 +208,9 @@ if(wa[0]){
 tombolWa+=`
 <a class="btn wa1"
 href="https://wa.me/62${wa[0].substring(1)}"
-target="_blank">WA 1</a>
+target="_blank">
+WA 1
+</a>
 `;
 
 }
@@ -100,7 +220,9 @@ if(wa[1]){
 tombolWa+=`
 <a class="btn wa2"
 href="https://wa.me/62${wa[1].substring(1)}"
-target="_blank">WA 2</a>
+target="_blank">
+WA 2
+</a>
 `;
 
 }
@@ -117,7 +239,7 @@ ${tombolWa}
 <button
 class="btn ${sudah ? 'sudah' : 'kirim'}"
 ${sudah ? 'disabled' : ''}
-onclick="kirimStatus('${customer.replace(/'/g,"")}','${wa[0] || ""}')">
+onclick="kirimStatus(\`${customer}\`,\`${wa[0] || ""}\`)">
 
 ${sudah ? '✓ TERKIRIM' : 'KIRIM'}
 
@@ -154,3 +276,6 @@ loadData();
 setInterval(loadData,5000);
 
 </script>
+
+</body>
+</html>
