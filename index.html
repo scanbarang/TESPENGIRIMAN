@@ -232,17 +232,16 @@ WA 2
 `;
 
 }
-
 html+=`
 <div class="card">
 
+<div style="margin-bottom:10px;">
 ${isi}
+</div>
 
 <div class="aksi">
 
-<div class="wa-row">
 ${tombolWa}
-</div>
 
 <button
 class="btn ${sudah ? 'sudah' : 'kirim'}"
@@ -257,7 +256,6 @@ ${sudah ? '✅ TERKIRIM' : '🚚 KIRIM'}
 
 </div>
 `;
-
 });
 
 document.getElementById("jumlah").innerHTML=`
