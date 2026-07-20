@@ -178,7 +178,6 @@ text-decoration:none;
 width:70px;
 }
 
-/* ICON WA MIRIP ASLI ANDROID HP */
 .wa-icon{
 width:58px; 
 height:58px;
@@ -188,16 +187,11 @@ display:flex;
 align-items:center;
 justify-content:center;
 box-shadow: 0 4px 10px rgba(18, 140, 126, 0.4);
-transition: transform 0.1s ease;
 }
 
 .wa2 .wa-icon{
 background: linear-gradient(135deg, #128C7E 0%, #075E54 100%);
 box-shadow: 0 4px 10px rgba(7, 94, 84, 0.4);
-}
-
-.wa-box:active .wa-icon {
-transform: scale(0.92);
 }
 
 .wa-icon svg{
@@ -238,11 +232,11 @@ background:#16a34a;
 color:#fff;
 }
 
-/* STYLE MODAL CUSTOM ELEGAN */
+/* STYLE MODAL / KAMERA */
 .modal-overlay {
 position: fixed;
 top: 0; left: 0; width: 100%; height: 100%;
-background: rgba(0, 0, 0, 0.5);
+background: rgba(0, 0, 0, 0.6);
 display: flex; justify-content: center; align-items: center;
 z-index: 9999; opacity: 0; pointer-events: none;
 transition: opacity 0.2s ease;
@@ -253,9 +247,9 @@ opacity: 1; pointer-events: auto;
 }
 
 .modal-content {
-background: #fff; padding: 24px 20px;
-border-radius: 16px; width: 290px; text-align: center;
-box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+background: #fff; padding: 20px;
+border-radius: 16px; width: 320px; text-align: center;
+box-shadow: 0 10px 25px rgba(0,0,0,0.3);
 transform: scale(0.8); transition: transform 0.2s ease;
 }
 
@@ -264,11 +258,20 @@ transform: scale(1);
 }
 
 .modal-title {
-font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #111;
+font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #111;
 }
 
 .modal-text {
-font-size: 14px; color: #555; line-height: 1.4; margin-bottom: 20px;
+font-size: 13px; color: #555; line-height: 1.4; margin-bottom: 12px;
+}
+
+#kamera-preview {
+width: 100%;
+height: 240px;
+object-fit: cover;
+border-radius: 10px;
+background: #000;
+margin-bottom: 10px;
 }
 
 .modal-buttons {
@@ -322,10 +325,16 @@ font-weight: 700; cursor: pointer; font-size: 13px; width: auto; flex: 1;
   <div id="list"></div>
 </div>
 
+<!-- MODAL KAMERA & KONFIRMASI -->
 <div id="customModal" class="modal-overlay">
   <div class="modal-content">
-    <div class="modal-title" id="mTitle">Notifikasi</div>
-    <div class="modal-text" id="mText">Isi pesan di sini...</div>
+    <div class="modal-title" id="mTitle">Bukti Foto Pengiriman</div>
+    <div class="modal-text" id="mText">Posisikan kamera ke barang/lokasi tujuan</div>
+    
+    <div id="containerKamera">
+      <video id="kamera-preview" autoplay playsinline></video>
+    </div>
+
     <div class="modal-buttons" id="mButtons"></div>
   </div>
 </div>
@@ -333,36 +342,27 @@ font-weight: 700; cursor: pointer; font-size: 13px; width: auto; flex: 1;
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzH4e2dQErvrU5m_1Q-s66gxG68JaKFae2foTcOrTUHiZT42sqY0xYHV4Cv04_Dowgi/exec";
 
-let fungsiCallbackKonfirmasi = null;
+let streamKamera = null;
+let fotoBase64Data = "";
+let dataAktifPengiriman = null;
 
-function bukaModal(judul, pesan, jenis, callback = null) {
+function bukaModalAlert(judul, pesan) {
   document.getElementById("mTitle").innerText = judul;
   document.getElementById("mText").innerText = pesan;
-  
-  const containerTombol = document.getElementById("mButtons");
-  containerTombol.innerHTML = "";
-
-  if (jenis === "alert") {
-    containerTombol.innerHTML = '<button type="button" class="btn-modal btn-oke" onclick="tutupModal()">TUTUP</button>';
-  } else if (jenis === "confirm") {
-    fungsiCallbackKonfirmasi = callback;
-    containerTombol.innerHTML = '<button type="button" class="btn-batal btn-modal" onclick="tutupModal()">BATAL</button><button type="button" class="btn-oke btn-modal" onclick="eksekusiKonfirmasi()">YA, YAKIN</button>';
-  }
-
+  document.getElementById("containerKamera").style.display = "none";
+  document.getElementById("mButtons").innerHTML = '<button type="button" class="btn-modal btn-oke" onclick="tutupModal()">TUTUP</button>';
   document.getElementById("customModal").classList.add("aktif");
 }
 
 function tutupModal() {
+  if (streamKamera) {
+    streamKamera.getTracks().forEach(track => track.stop());
+    streamKamera = null;
+  }
   document.getElementById("customModal").classList.remove("aktif");
-  fungsiCallbackKonfirmasi = null;
 }
 
-function eksekusiKonfirmasi() {
-  if (fungsiCallbackKonfirmasi) fungsiCallbackKonfirmasi();
-  tutupModal();
-}
-
-/* LOGIN DENGAN AUTO FULLSCREEN */
+/* LOGIN */
 function login() {
   const user = document.getElementById("user").value;
   const pass = document.getElementById("pass").value;
@@ -372,7 +372,7 @@ function login() {
   const text = document.getElementById("textLogin");
 
   if(!user || !pass) {
-    bukaModal("Data Kurang", "Username dan Password harus diisi!", "alert");
+    bukaModalAlert("Data Kurang", "Username dan Password harus diisi!");
     return;
   }
 
@@ -387,90 +387,119 @@ function login() {
       localStorage.setItem("driver", res.user);
       
       const docEl = document.documentElement;
-      if (docEl.requestFullscreen) {
-        docEl.requestFullscreen();
-      } else if (docEl.webkitRequestFullscreen) {
-        docEl.webkitRequestFullscreen();
-      } else if (docEl.msRequestFullscreen) {
-        docEl.msRequestFullscreen();
-      }
+      if (docEl.requestFullscreen) docEl.requestFullscreen();
 
       document.getElementById("loginBox").style.display = "none";
       document.getElementById("app").style.display = "block";
       loadData();
     } else {
-      bukaModal("Login Gagal", "Username atau Password salah. Periksa kembali!", "alert");
+      bukaModalAlert("Login Gagal", "Username atau Password salah. Periksa kembali!");
       btn.disabled = false;
       spinner.style.display = "none";
       text.innerText = "MASUK";
     }
   })
   .catch(() => {
-    bukaModal("Koneksi Error", "Gagal terhubung ke server. Periksa internet Anda.", "alert");
+    bukaModalAlert("Koneksi Error", "Gagal terhubung ke server. Periksa internet Anda.");
     btn.disabled = false;
     spinner.style.display = "none";
     text.innerText = "MASUK";
   });
 }
 
-/* PARSE NAMA CUSTOMER */
 function ambilCustomer(text) {
   const m = text.match(/CUSTOMER\s*:\s*([^\n]+)/i);
   return m ? m[1].trim() : "";
 }
 
-/* PARSE NOMOR WA */
 function ambilWa(text) {
   const wa = text.match(/08\d{8,13}/g);
   return wa || [];
 }
 
-/* KIRIM STATUS PENGIRIMAN */
-function kirimStatus(customer, wa, idx) {
-  bukaModal(
-    "Konfirmasi Pengiriman", 
-    "Apakah Anda yakin barang untuk \"" + customer + "\" benar-benar sudah dikirim?", 
-    "confirm", 
-    () => {
-      const driver = localStorage.getItem("driver") || "DRIVER";
-      
-      const btn = document.getElementById("btn-" + idx);
-      const spinner = document.getElementById("spin-" + idx);
-      const text = document.getElementById("txt-" + idx);
+/* 1. KETIKA TOMBOL KIRIM DIKLIK -> BUKA KAMERA DULU */
+function mintaFotoBukti(customer, wa, idx) {
+  dataAktifPengiriman = { customer, wa, idx };
+  
+  document.getElementById("mTitle").innerText = "Ambil Foto Bukti";
+  document.getElementById("mText").innerText = "Customer: " + customer;
+  document.getElementById("containerKamera").style.display = "block";
+  
+  document.getElementById("mButtons").innerHTML = `
+    <button type="button" class="btn-batal btn-modal" onclick="tutupModal()">BATAL</button>
+    <button type="button" class="btn-oke btn-modal" onclick="ambilFotoDanKirim()">AMBIL FOTO & KIRIM</button>
+  `;
 
-      btn.disabled = true;
-      spinner.style.display = "block";
-      text.innerText = "MENGIRIM...";
+  document.getElementById("customModal").classList.add("aktif");
 
-      const urlKirim = API_URL +
-        "?customer=" + encodeURIComponent(customer) +
-        "&driver=" + encodeURIComponent(driver) +
-        "&wa=" + encodeURIComponent(wa);
-
-      fetch(urlKirim, { redirect: "follow" })
-      .then(r => r.json()) // Respon dari Apps Script baru berupa JSON {status: "OK"}
-      .then(res => {
-        if(res.status === "OK"){
-          bukaModal("Berhasil!", "Status pengiriman untuk " + customer + " sukses diperbarui.", "alert");
-          loadData();
-        } else {
-          bukaModal("Gagal", "Respon server bermasalah.", "alert");
-          btn.disabled = false;
-          spinner.style.display = "none";
-          text.innerText = "🚚 KIRIM";
-        }
-      })
-      .catch(() => {
-        bukaModal("Error", "Gagal mengirim data. Coba beberapa saat lagi.", "alert");
-        btn.disabled = false;
-        spinner.style.display = "none";
-        text.innerText = "🚚 KIRIM";
-      });
-    }
-  );
+  // Jalankan Kamera Belakang HP (environment)
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+  .then(stream => {
+    streamKamera = stream;
+    document.getElementById("kamera-preview").srcObject = stream;
+  })
+  .catch(err => {
+    bukaModalAlert("Kamera Error", "Gagal membuka kamera. Pastikan izin kamera aktif.");
+  });
 }
 
-/* LOAD DATA DARI SHEET */
+/* 2. PROSES CAPTURE GAMBAR DARI VIDEO & KIRIM KE SERVER */
+function ambilFotoDanKirim() {
+  const video = document.getElementById("kamera-preview");
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  const ctx = canvas.getContext("2d");
+  
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  fotoBase64Data = canvas.toDataURL("image/jpeg", 0.6); // Kompresi kualitas 60% agar ringan dikirim
+
+  // Matikan kamera setelah foto diambil
+  if (streamKamera) {
+    streamKamera.getTracks().forEach(track => track.stop());
+    streamKamera = null;
+  }
+
+  // Lanjutkan proses pengiriman ke server
+  eksekusiKirimKeServer();
+}
+
+/* 3. EKSEKUSI PENGIRIMAN DATA + FOTO KE GOOGLE APPS SCRIPT */
+function eksekusiKirimKeServer() {
+  const { customer, wa, idx } = dataAktifPengiriman;
+  const driver = localStorage.getItem("driver") || "DRIVER";
+  
+  document.getElementById("containerKamera").style.display = "none";
+  document.getElementById("mTitle").innerText = "Mengirim Data...";
+  document.getElementById("mText").innerText = "Mohon tunggu, sedang mengunggah bukti foto...";
+  document.getElementById("mButtons").innerHTML = "";
+
+  fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      action: "kirim_pengiriman",
+      customer: customer,
+      driver: driver,
+      wa: wa,
+      foto: fotoBase64Data
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if(res.status === "OK"){
+      bukaModalAlert("Berhasil!", "Status pengiriman & foto bukti untuk " + customer + " sukses disimpan.");
+      loadData();
+    } else {
+      bukaModalAlert("Gagal", "Respon server: " + (res.pesan || "Terjadi kesalahan"));
+    }
+  })
+  .catch(() => {
+    bukaModalAlert("Error", "Gagal mengirim data. Coba beberapa saat lagi.");
+  });
+}
+
+/* LOAD DATA */
 function loadData() {
   fetch(API_URL)
   .then(r => r.json())
@@ -506,8 +535,9 @@ function loadData() {
 
       html += '</div>';
       html += '<div class="aksi">';
-      html += '<button type="button" class="btn ' + (sudah ? 'sudah' : 'kirim') + '" id="btn-' + index + '" ' + (sudah ? 'disabled' : '') + ' onclick="kirimStatus(\'' + customer + '\',\'' + (wa[0] || '') + '\', ' + index + ')">';
-      html += '<div class="btn-isi"><span id="txt-' + index + '">' + (sudah ? '✓ TERKIRIM' : '🚚 KIRIM') + '</span><div class="spinner" id="spin-' + index + '"></div></div>';
+      // Tombol Kirim sekarang memicu fungsi buka kamera terlebih dahulu (mintaFotoBukti)
+      html += '<button type="button" class="btn ' + (sudah ? 'sudah' : 'kirim') + '" ' + (sudah ? 'disabled' : '') + ' onclick="mintaFotoBukti(\'' + customer + '\',\'' + (wa[0] || '') + '\', ' + index + ')">';
+      html += '<div class="btn-isi"><span>' + (sudah ? '✓ TERKIRIM' : '🚚 KIRIM & FOTO') + '</span></div>';
       html += '</button>';
       html += '</div>';
       html += '</div>';
@@ -520,7 +550,6 @@ function loadData() {
   });
 }
 
-/* FUNGSI LIVE SEARCH FILTER */
 function filterCustomer() {
   const keyword = document.getElementById("cariCustomer").value.toLowerCase();
   const cards = document.querySelectorAll(".card");
