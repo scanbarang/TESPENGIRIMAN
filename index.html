@@ -452,7 +452,7 @@ function ambilFotoDanKirim() {
   const ctx = canvas.getContext("2d");
   
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  fotoBase64Data = canvas.toDataURL("image/jpeg", 0.6); // Kompresi kualitas 60% agar ringan dikirim
+  fotoBase64Data = canvas.toDataURL("image/jpeg", 0.3); // Kompresi kualitas 60% agar ringan dikirim
 
   // Matikan kamera setelah foto diambil
   if (streamKamera) {
